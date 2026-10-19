@@ -1,0 +1,10 @@
+{
+  "name": "matea",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MATEA landing page - tea on a stick",
+  "scripts": {
+    "dev": "npx --yes serve . -l 3000",
+    "deploy": "npx --yes vercel --prod"
+  }
+}
