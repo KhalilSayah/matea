@@ -17,6 +17,22 @@
   var mount = document.querySelector('[data-composer]');
   if (!mount) return;
 
+  /* Le composeur ne tient debout qu'avec shop.css : sans elle, la feuille
+     de confirmation n'a pas son display:none et s'étale au milieu de la
+     page. On le dit tout de suite plutôt que de laisser un site cassé. */
+  var probe = document.createElement('div');
+  probe.className = 'sheet';
+  probe.style.cssText = 'position:absolute;visibility:hidden';
+  document.body.appendChild(probe);
+  var styled = getComputedStyle(probe).display === 'none';
+  probe.remove();
+  if (!styled) {
+    mount.innerHTML = '<p class="warnstrip">assets/css/shop.css manquante : ' +
+      'ajoute &lt;link rel="stylesheet" href="assets/css/shop.css"&gt; dans cette page.</p>';
+    console.error('[MATEA] composer.js a besoin de assets/css/shop.css — non chargée sur cette page.');
+    return;
+  }
+
   var cfg = window.MATEA_CONFIG || {};
   var CAP = Number(cfg.packSize) || 10;
   var MIN = Math.max(1, Math.min(Number(cfg.minPerPack) || 1, CAP));
