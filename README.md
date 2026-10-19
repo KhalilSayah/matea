@@ -319,6 +319,10 @@ Les trois pannes les plus fréquentes, dans l'ordre :
    dans la clé et le dit.
 3. **Le schéma a été exécuté sur un autre projet Supabase** que celui dont
    l'URL est dans Vercel.
+4. **`403 — permission denied for table products`** : les `GRANT` du schéma
+   n'ont pas été passés. RLS et privilèges sont deux choses différentes —
+   `service_role` ignore RLS mais pas les privilèges. Rejoue le bloc
+   « Privilèges » de `supabase/schema.sql`.
 
 Le back office affiche toujours l'état en haut : `local`, `supabase`, ou
 `erreur` en rouge avec le message.

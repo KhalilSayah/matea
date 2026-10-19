@@ -72,6 +72,34 @@ create trigger products_touch before update on public.products
   for each row execute function public.touch_updated_at();
 
 -- ---------------------------------------------------------------
+-- Privilèges
+--
+-- RLS et privilèges sont deux choses différentes, et il faut les deux.
+--
+--   privilèges : le rôle a-t-il le droit de toucher à cette table ?
+--   RLS        : parmi les lignes, lesquelles a-t-il le droit de voir ?
+--
+-- service_role ignore RLS, mais PAS les privilèges. Sans les GRANT
+-- ci-dessous, PostgREST répond 403 « permission denied for table
+-- products » même avec la bonne clé.
+--
+-- Ne pas compter sur les privilèges par défaut du projet : ils dépendent
+-- du rôle qui crée la table et de l'âge du projet. On les pose à la main,
+-- le schéma devient reproductible partout.
+--
+-- Seul service_role reçoit quelque chose : tous les accès passent par les
+-- fonctions de /api. anon et authenticated n'ont rien à faire ici.
+-- ---------------------------------------------------------------
+grant usage on schema public to service_role;
+
+grant select, insert, update, delete on public.products to service_role;
+grant select, insert, update, delete on public.orders   to service_role;
+
+-- pour les tables que tu ajouterais plus tard dans ce schéma
+alter default privileges in schema public
+  grant select, insert, update, delete on tables to service_role;
+
+-- ---------------------------------------------------------------
 -- RLS
 --
 -- Le site ne parle JAMAIS à Supabase depuis le navigateur. Tout passe
