@@ -33,7 +33,7 @@
     s3t:'Lift it out', s3b:'A bare birch stick comes back. Nothing left in the cup but tea.',
 
     ctaH:'First batch<br>ships soon.',
-    ctaP:'Nine sticks, three of each flavour — 630 DA the box. Leave an email and we will send one free before you commit.',
+    ctaP:'70 DA a stick, and you fill the pouch yourself: mix whatever flavours you like. No account, no online payment — you pay on delivery.',
     dockT:'Build your own pouch',
     dockS:'70 DA a stick · you pick the flavours',
     ctaBtn:'Send me one',

@@ -41,112 +41,16 @@
     <h1 data-t="cmpH">Compose ton<br><i>doypack.</i></h1>
     <p class="intro" data-t="cmpIntro">Mélange les parfums que tu veux, bâton par bâton. Deux hibiscus, trois menthe, le reste en camomille : c'est toi qui décides.</p>
 
-    <!-- le sachet en cours de remplissage -->
-    <section class="builder" aria-label="Doypack en cours">
-      <div class="bpouch">
-        <div class="seal"></div><div class="notch"></div>
-        <div class="pmark">MATEA</div>
-        <div class="bwin" id="slots" aria-hidden="true"></div>
-        <div class="pstripe" id="bstripe"></div>
-        <div class="gloss"></div>
-      </div>
-      <div class="bmeta">
-        <div class="bcount"><b id="cCount">0</b><span id="cCap">/ 10 bâtons</span></div>
-        <div class="bprice" id="cPrice">0 DA</div>
-        <p class="bhint" id="cHint"></p>
-        <button type="button" class="badd" id="addPack" disabled data-t="cmpAdd">Ajouter ce doypack</button>
-      </div>
-    </section>
-
-    <h2 class="sect" data-t="cmpPick">Choisis tes bâtons</h2>
-    <div id="flavours" aria-live="polite"></div>
-    <div class="empty" id="empty" hidden data-t="ordEmpty">Le catalogue est vide pour le moment.</div>
-
-    <section id="cartBox" hidden>
-      <h2 class="sect" data-t="cmpCart">Ton panier</h2>
-      <div id="packs"></div>
-    </section>
+    <div data-composer></div>
   </main>
 </div>
-
-<div class="bar" id="bar">
-  <div class="barin">
-    <div class="ct">
-      <b id="barTotal">0 DA</b>
-      <span id="barCount">0 doypack</span>
-    </div>
-    <button type="button" id="goOrder" data-t="ordGo">Commander</button>
-  </div>
-</div>
-
-<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-  <div class="veil" data-close></div>
-  <div class="panel">
-
-    <div id="formStep">
-      <div class="hd">
-        <h2 id="sheetTitle" data-t="ordConfirm">Confirmer la<br>commande.</h2>
-        <button type="button" class="shut" data-close aria-label="Fermer">×</button>
-      </div>
-
-      <div class="recap" id="recap"></div>
-
-      <form id="orderForm" novalidate>
-        <div class="fields">
-          <label>
-            <span class="lb" data-t="fFirst">Prénom</span>
-            <input id="firstName" name="firstName" type="text" autocomplete="given-name" required
-                   placeholder="Yacine" data-t="fFirstPh" data-tattr="placeholder">
-          </label>
-          <label>
-            <span class="lb" data-t="fLast">Nom</span>
-            <input id="lastName" name="lastName" type="text" autocomplete="family-name" required
-                   placeholder="Benali" data-t="fLastPh" data-tattr="placeholder">
-          </label>
-          <label>
-            <span class="lb" data-t="fPhone">Téléphone</span>
-            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required
-                   placeholder="0555 12 34 56" data-t="fPhonePh" data-tattr="placeholder">
-          </label>
-          <label>
-            <span class="lb" data-t="fWilaya">Wilaya</span>
-            <select id="wilaya" name="wilaya" required autocomplete="address-level1">
-              <option value="" data-t="fWilayaPick">Choisis ta wilaya</option>
-            </select>
-          </label>
-          <label>
-            <span class="lb" data-t="fAddress">Adresse de livraison</span>
-            <textarea id="address" name="address" rows="2" required autocomplete="street-address"
-                      placeholder="Cité, rue, numéro, point de repère" data-t="fAddressPh" data-tattr="placeholder"></textarea>
-          </label>
-        </div>
-        <p class="err" id="formErr" role="alert"></p>
-        <button type="submit" class="send" id="sendBtn" data-t="ordSend">Confirmer la commande</button>
-        <p class="fine" data-t="ordFine">On ne demande que le strict nécessaire pour te rappeler. Aucun paiement en ligne : tu règles à la livraison.</p>
-      </form>
-    </div>
-
-    <div id="doneStep" hidden>
-      <div class="done-wrap">
-        <div class="tick" aria-hidden="true">✓</div>
-        <h2 data-t="ordDone">C'est enregistré.</h2>
-        <div class="ref" id="doneRef">MT-------</div>
-        <p id="doneMsg" data-t="ordDoneMsg">Garde cette référence. On t'appelle dans la journée pour confirmer l'adresse et la livraison.</p>
-        <button type="button" class="send" data-close data-t="ordBack" style="margin-top:22px">Revenir à la boutique</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/config.js" defer></script>
 <script src="assets/js/products.js" defer></script>
 <script src="assets/js/wilayas.js" defer></script>
 <script src="assets/js/store.js" defer></script>
 <script src="assets/js/i18n.shop.js" defer></script>
+<script src="assets/js/composer.js" defer></script>
 <script src="assets/js/i18n.js" defer></script>
-<script src="assets/js/commander.js" defer></script>
 </body>
 </html>

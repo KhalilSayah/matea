@@ -174,3 +174,7 @@ footer{border-top:1px solid var(--ink-3);padding-block:24px 32px;display:flex;ju
 .dockin:hover{background:var(--cream)}
 .dockin:focus-visible{outline:3px solid var(--tea);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.dock{transition:none}}
+
+/* bloc email : secondaire, sous le composeur */
+.cta-mail{margin-top:34px}
+.cta-mail h2{font-size:clamp(21px,5.6vw,26px)}

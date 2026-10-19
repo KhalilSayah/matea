@@ -4,35 +4,125 @@
    puis l'ajoute à son panier et en compose un autre s'il veut.
 
      draft  : { idParfum: quantité }   le sachet en cours
-     packs  : [ draft, draft, ... ]    les sachets déjà mis au panier       */
+     packs  : [ draft, draft, ... ]    les sachets déjà mis au panier
+
+   Le composeur se monte dans n'importe quel <div data-composer></div> :
+   la page de commande et le bas de la landing partagent ce fichier, il
+   n'existe donc qu'une seule version du panier et du formulaire.
+
+   Ce fichier doit être chargé AVANT i18n.js : il injecte du français
+   que le moteur de traduction relève ensuite comme texte de référence. */
 
 (function () {
+  var mount = document.querySelector('[data-composer]');
+  if (!mount) return;
+
   var cfg = window.MATEA_CONFIG || {};
   var CAP = Number(cfg.packSize) || 10;
   var MIN = Math.max(1, Math.min(Number(cfg.minPerPack) || 1, CAP));
 
-  var slots = document.getElementById('slots'),
-      bstripe = document.getElementById('bstripe'),
-      cCount = document.getElementById('cCount'),
-      cCap = document.getElementById('cCap'),
-      cPrice = document.getElementById('cPrice'),
-      cHint = document.getElementById('cHint'),
-      addPack = document.getElementById('addPack'),
-      flavours = document.getElementById('flavours'),
-      empty = document.getElementById('empty'),
-      cartBox = document.getElementById('cartBox'),
-      packsBox = document.getElementById('packs'),
-      bar = document.getElementById('bar'),
-      barTotal = document.getElementById('barTotal'),
-      barCount = document.getElementById('barCount'),
-      sheet = document.getElementById('sheet'),
-      recap = document.getElementById('recap'),
-      form = document.getElementById('orderForm'),
-      formErr = document.getElementById('formErr'),
-      sendBtn = document.getElementById('sendBtn'),
-      formStep = document.getElementById('formStep'),
-      doneStep = document.getElementById('doneStep'),
-      toastEl = document.getElementById('toast');
+  /* ---------- le gabarit ---------- */
+
+  mount.innerHTML =
+    '<section class="builder" aria-label="Doypack en cours">' +
+      '<div class="bpouch">' +
+        '<div class="seal"></div><div class="notch"></div>' +
+        '<div class="pmark">MATEA</div>' +
+        '<div class="bwin" id="slots" aria-hidden="true"></div>' +
+        '<div class="pstripe" id="bstripe"></div>' +
+        '<div class="gloss"></div>' +
+      '</div>' +
+      '<div class="bmeta">' +
+        '<div class="bcount"><b id="cCount">0</b><span id="cCap">/ ' + CAP + ' bâtons</span></div>' +
+        '<div class="bprice" id="cPrice">0 DA</div>' +
+        '<p class="bhint" id="cHint"></p>' +
+        '<button type="button" class="badd" id="addPack" disabled data-t="cmpAdd">Ajouter ce doypack</button>' +
+      '</div>' +
+    '</section>' +
+
+    '<h2 class="sect" data-t="cmpPick">Choisis tes bâtons</h2>' +
+    '<div id="flavours" aria-live="polite"></div>' +
+    '<div class="empty" id="empty" hidden data-t="ordEmpty">Le catalogue est vide pour le moment.</div>' +
+
+    '<section id="cartBox" hidden>' +
+      '<h2 class="sect" data-t="cmpCart">Ton panier</h2>' +
+      '<div id="packs"></div>' +
+    '</section>';
+
+  /* Les éléments fixes vivent sur <body> : à l'intérieur du flux, un
+     parent avec transform ou overflow casserait leur positionnement. */
+  var fixed = document.createElement('div');
+  fixed.innerHTML =
+    '<div class="bar" id="bar">' +
+      '<div class="barin">' +
+        '<div class="ct"><b id="barTotal">0 DA</b><span id="barCount">0 doypack</span></div>' +
+        '<button type="button" id="goOrder" data-t="ordGo">Commander</button>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">' +
+      '<div class="veil" data-close></div>' +
+      '<div class="panel">' +
+        '<div id="formStep">' +
+          '<div class="hd">' +
+            '<h2 id="sheetTitle" data-t="ordConfirm">Confirmer la<br>commande.</h2>' +
+            '<button type="button" class="shut" data-close aria-label="Fermer">×</button>' +
+          '</div>' +
+          '<div class="recap" id="recap"></div>' +
+          '<form id="orderForm" novalidate>' +
+            '<div class="fields">' +
+              '<label><span class="lb" data-t="fFirst">Prénom</span>' +
+                '<input id="firstName" type="text" autocomplete="given-name" required ' +
+                'placeholder="Yacine" data-t="fFirstPh" data-tattr="placeholder"></label>' +
+              '<label><span class="lb" data-t="fLast">Nom</span>' +
+                '<input id="lastName" type="text" autocomplete="family-name" required ' +
+                'placeholder="Benali" data-t="fLastPh" data-tattr="placeholder"></label>' +
+              '<label><span class="lb" data-t="fPhone">Téléphone</span>' +
+                '<input id="phone" type="tel" inputmode="tel" autocomplete="tel" required ' +
+                'placeholder="0555 12 34 56" data-t="fPhonePh" data-tattr="placeholder"></label>' +
+              '<label><span class="lb" data-t="fWilaya">Wilaya</span>' +
+                '<select id="wilaya" required autocomplete="address-level1">' +
+                  '<option value="" data-t="fWilayaPick">Choisis ta wilaya</option>' +
+                '</select></label>' +
+              '<label><span class="lb" data-t="fAddress">Adresse de livraison</span>' +
+                '<textarea id="address" rows="2" required autocomplete="street-address" ' +
+                'placeholder="Cité, rue, numéro, point de repère" data-t="fAddressPh" ' +
+                'data-tattr="placeholder"></textarea></label>' +
+            '</div>' +
+            '<p class="err" id="formErr" role="alert"></p>' +
+            '<button type="submit" class="send" id="sendBtn" data-t="ordSend">Confirmer la commande</button>' +
+            '<p class="fine" data-t="ordFine">On ne demande que le strict nécessaire pour te rappeler. ' +
+              'Aucun paiement en ligne : tu règles à la livraison.</p>' +
+          '</form>' +
+        '</div>' +
+        '<div id="doneStep" hidden>' +
+          '<div class="done-wrap">' +
+            '<div class="tick" aria-hidden="true">✓</div>' +
+            '<h2 data-t="ordDone">C\'est enregistré.</h2>' +
+            '<div class="ref" id="doneRef">MT-------</div>' +
+            '<p data-t="ordDoneMsg">Garde cette référence. On t\'appelle dans la journée pour ' +
+              'confirmer l\'adresse et la livraison.</p>' +
+            '<button type="button" class="send" data-close data-t="ordBack" ' +
+              'style="margin-top:22px">Revenir à la boutique</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="toast" id="toast" role="status" aria-live="polite"></div>';
+
+  while (fixed.firstChild) document.body.appendChild(fixed.firstChild);
+
+  /* ---------- références ---------- */
+
+  var id = function (x) { return document.getElementById(x); };
+  var slots = id('slots'), bstripe = id('bstripe'), cCount = id('cCount'), cCap = id('cCap'),
+      cPrice = id('cPrice'), cHint = id('cHint'), addPack = id('addPack'),
+      flavours = id('flavours'), empty = id('empty'), cartBox = id('cartBox'),
+      packsBox = id('packs'), bar = id('bar'), barTotal = id('barTotal'),
+      barCount = id('barCount'), sheet = id('sheet'), recap = id('recap'),
+      form = id('orderForm'), formErr = id('formErr'), sendBtn = id('sendBtn'),
+      formStep = id('formStep'), doneStep = id('doneStep'), toastEl = id('toast');
 
   var KEY = 'matea.packs';
   var products = [], draft = {}, packs = [], lastFocus = null;
@@ -45,7 +135,7 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  function find(id) { return products.find(function (p) { return p.id === id; }); }
+  function find(x) { return products.find(function (p) { return p.id === x; }); }
   function nameOf(p) { return lang() === 'en' ? (p.name_en || p.name) : p.name; }
 
   function save() {
@@ -90,9 +180,7 @@
 
   /* Un bâton vu à travers la fenêtre du sachet : tête ronde et manche. */
   function stickGlyph(tint, filled) {
-    if (!filled) {
-      return '<span class="slot free"></span>';
-    }
+    if (!filled) return '<span class="slot free"></span>';
     return '<span class="slot" style="--c:' + esc(tint) + '">' +
       '<svg viewBox="0 0 20 46" aria-hidden="true">' +
         '<rect x="8.6" y="16" width="2.8" height="28" rx="1.4" fill="#C8B38A"/>' +
@@ -124,8 +212,7 @@
       ? 'linear-gradient(90deg,' + ordered.join(',') + ')'
       : 'var(--ink-3)';
 
-    var ok = n >= MIN;
-    addPack.disabled = !ok;
+    addPack.disabled = n < MIN;
     addPack.textContent = n >= CAP
       ? t('Ajouter ce doypack · complet', 'Add this pouch · full')
       : t('Ajouter ce doypack', 'Add this pouch');
@@ -181,16 +268,16 @@
   flavours.addEventListener('click', function (e) {
     var b = e.target.closest('button[data-act]');
     if (!b || b.disabled) return;
-    var id = b.getAttribute('data-id'), act = b.getAttribute('data-act');
-    var p = find(id);
+    var pid = b.getAttribute('data-id'), act = b.getAttribute('data-act');
+    var p = find(pid);
     if (!p || p.status === 'victime') return;
 
     if (act === 'inc') {
       if (countOf(draft) >= CAP) { toast(t('Sachet plein', 'Pouch full')); return; }
-      draft[id] = (draft[id] || 0) + 1;
+      draft[pid] = (draft[pid] || 0) + 1;
     } else {
-      draft[id] = (draft[id] || 0) - 1;
-      if (draft[id] <= 0) delete draft[id];
+      draft[pid] = (draft[pid] || 0) - 1;
+      if (draft[pid] <= 0) delete draft[pid];
     }
     save();
     renderBuilder();
@@ -235,7 +322,6 @@
     renderFlavours();
     renderPacks();
     toast('✓ ' + t('Doypack ajouté · ' + n + ' bâtons', 'Pouch added · ' + n + ' sticks'));
-    cartBox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   });
 
   function syncBar() {
@@ -245,18 +331,15 @@
       ? (n > 1 ? 'pouches' : 'pouch')
       : (n > 1 ? 'doypacks' : 'doypack'));
     bar.classList.toggle('up', n > 0);
+    /* le bandeau d'appel à l'action de la landing laisse la place au panier */
+    document.dispatchEvent(new CustomEvent('matea:cart', { detail: { count: n } }));
   }
 
   /* ---------- confirmation ---------- */
 
   function orderItems() {
     return packs.map(function (d, i) {
-      return {
-        pack: i + 1,
-        sticks: linesOf(d),
-        stick_count: countOf(d),
-        total_da: priceOf(d)
-      };
+      return { pack: i + 1, sticks: linesOf(d), stick_count: countOf(d), total_da: priceOf(d) };
     });
   }
 
@@ -274,7 +357,7 @@
     doneStep.hidden = true;
     sheet.classList.add('open');
     document.body.style.overflow = 'hidden';
-    setTimeout(function () { document.getElementById('firstName').focus(); }, 60);
+    setTimeout(function () { id('firstName').focus(); }, 60);
   }
 
   function closeSheet() {
@@ -283,7 +366,7 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
-  document.getElementById('goOrder').addEventListener('click', openSheet);
+  id('goOrder').addEventListener('click', openSheet);
   sheet.addEventListener('click', function (e) {
     if (e.target.closest('[data-close]')) closeSheet();
   });
@@ -312,13 +395,12 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     formErr.classList.remove('on');
-    ['firstName', 'lastName', 'phone', 'wilaya', 'address'].forEach(function (id) {
-      document.getElementById(id).removeAttribute('aria-invalid');
+    ['firstName', 'lastName', 'phone', 'wilaya', 'address'].forEach(function (x) {
+      id(x).removeAttribute('aria-invalid');
     });
 
-    var first = document.getElementById('firstName'),
-        last = document.getElementById('lastName'),
-        tel = document.getElementById('phone');
+    var first = id('firstName'), last = id('lastName'), tel = id('phone'),
+        wil = id('wilaya'), adr = id('address');
 
     if (first.value.trim().length < 2) return fail(first, t('Indique ton prénom.', 'Enter your first name.'));
     if (last.value.trim().length < 2) return fail(last, t('Indique ton nom.', 'Enter your last name.'));
@@ -328,7 +410,6 @@
       return fail(tel, t('Numéro algérien à 10 chiffres, par exemple 0555 12 34 56.',
                          'Algerian number, 10 digits, e.g. 0555 12 34 56.'));
     }
-    var wil = document.getElementById('wilaya'), adr = document.getElementById('address');
     if (!wil.value) return fail(wil, t('Choisis ta wilaya.', 'Pick your wilaya.'));
     if (adr.value.trim().length < 6) {
       return fail(adr, t('Donne une adresse où te livrer.', 'Give an address for the delivery.'));
@@ -347,10 +428,10 @@
       items: orderItems(),
       total_da: cartTotal()
     }).then(function (order) {
-      try { localStorage.setItem('matea.wilaya', wil.value); } catch (e) {}
+      try { localStorage.setItem('matea.wilaya', wil.value); } catch (e2) {}
       packs = []; draft = {}; save();
       renderBuilder(); renderFlavours(); renderPacks();
-      document.getElementById('doneRef').textContent = order.ref;
+      id('doneRef').textContent = order.ref;
       formStep.hidden = true;
       doneStep.hidden = false;
       form.reset();
@@ -366,7 +447,7 @@
   /* ---------- démarrage ---------- */
 
   (function fillWilayas() {
-    var sel = document.getElementById('wilaya');
+    var sel = id('wilaya');
     if (!sel || !window.MATEA_WILAYAS) return;
     var frag = document.createDocumentFragment();
     window.MATEA_WILAYAS.forEach(function (w) {
@@ -382,6 +463,7 @@
   })();
 
   load();
+
   MATEA.store.ready.then(function () {
     if (!MATEA.store.problem) return;
     var strip = document.createElement('p');
@@ -390,17 +472,18 @@
                           'The server is not answering properly: ') + MATEA.store.problem +
       t(' — les commandes ne partiront pas. Ouvre /api/health.',
         ' — orders will not go through. Open /api/health.');
-    document.querySelector('.page').prepend(strip);
+    mount.prepend(strip);
   });
+
   MATEA.store.listProducts().then(function (list) {
     products = list;
 
     /* un parfum retiré du catalogue ou passé en rupture ne doit pas
        rester dans un sachet composé avant son retrait */
     function clean(d) {
-      Object.keys(d).forEach(function (id) {
-        var p = find(id);
-        if (!p || p.status === 'victime') delete d[id];
+      Object.keys(d).forEach(function (x) {
+        var p = find(x);
+        if (!p || p.status === 'victime') delete d[x];
       });
       return d;
     }

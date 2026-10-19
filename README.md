@@ -71,7 +71,7 @@ assets/js/i18n.shop.js  textes des pages commande et admin
 assets/js/caramel.js    la traînée de caramel au doigt
 assets/js/dock.js       l'appel à l'action collé en bas de la landing
 assets/js/wilayas.js    les 58 wilayas
-assets/js/commander.js  panier et commande
+assets/js/composer.js   le composeur de doypack, panier et commande
 assets/js/admin.js      gestion du catalogue et des commandes
 
 assets/img/             photos, image de partage, favicon
@@ -178,7 +178,22 @@ Tout est dans `assets/js/scene.js`.
 
 ## Composer son doypack
 
-`/commander` — aucun compte, aucun paiement en ligne.
+Deux endroits, un seul code : le bas de la landing (`#commander`) et la page
+`/commander`. `assets/js/composer.js` s'injecte dans n'importe quel
+`<div data-composer></div>`, donc le panier et le formulaire n'existent
+qu'en un seul exemplaire.
+
+> `composer.js` doit être chargé **avant** `i18n.js` : il injecte le français
+> que le moteur de traduction relève ensuite comme texte de référence. Les
+> éléments fixes — barre de panier, feuille de confirmation, toast — sont
+> ajoutés à `<body>`, hors du flux, pour qu'aucun parent avec `transform`
+> ou `overflow` ne casse leur positionnement.
+
+Depuis la page d'accueil, le bandeau collé en bas ne change plus de page : il
+fait glisser jusqu'à la section de commande, et s'efface dès qu'on y est ou
+dès qu'un doypack est au panier — la barre de panier prend le relais.
+
+Aucun compte, aucun paiement en ligne.
 
 **Le doypack n'est pas un produit, c'est un contenant que le client remplit.**
 Un produit, c'est un *parfum de bâton* vendu à l'unité (70 DA). Le client
