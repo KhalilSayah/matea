@@ -312,8 +312,16 @@
       var live = MATEA.store.mode === 'remote';
       var tag = document.getElementById('modeTag');
       tag.classList.toggle('live', live);
-      tag.querySelector('span').textContent = live ? 'supabase' : 'local';
-      document.getElementById('localNote').hidden = live;
+      tag.classList.toggle('broken', Boolean(MATEA.store.problem));
+      tag.querySelector('span').textContent = MATEA.store.problem ? 'erreur'
+                                            : (live ? 'supabase' : 'local');
+      var note = document.getElementById('localNote');
+      note.hidden = live && !MATEA.store.problem;
+      if (MATEA.store.problem) {
+        note.textContent = t('Le serveur répond mais échoue : ', 'The server answers but fails: ') +
+          MATEA.store.problem + t('. Ouvre /api/health pour le détail.',
+                                  '. Open /api/health for details.');
+      }
       document.getElementById('resetBtn').hidden = live;
       clearForm();
       load();

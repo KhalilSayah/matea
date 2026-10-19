@@ -382,6 +382,16 @@
   })();
 
   load();
+  MATEA.store.ready.then(function () {
+    if (!MATEA.store.problem) return;
+    var strip = document.createElement('p');
+    strip.className = 'warnstrip';
+    strip.textContent = t('Le serveur ne répond pas correctement : ',
+                          'The server is not answering properly: ') + MATEA.store.problem +
+      t(' — les commandes ne partiront pas. Ouvre /api/health.',
+        ' — orders will not go through. Open /api/health.');
+    document.querySelector('.page').prepend(strip);
+  });
   MATEA.store.listProducts().then(function (list) {
     products = list;
 

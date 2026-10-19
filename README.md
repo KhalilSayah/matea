@@ -302,6 +302,27 @@ Deux variables facultatives : `PACK_SIZE` (défaut 10) et `ORDER_PREFIX`
 
 Ouvre `/admin` : le badge en haut doit passer de `local` à `supabase`.
 
+### Quand ça ne marche pas
+
+Ouvre **`/api/health`** sur ton déploiement. La page dit lesquelles des trois
+variables manquent, si Supabase répond, si la bonne clé a été collée, et
+combien de produits sont visibles. Avec le mot de passe admin en en-tête, elle
+donne en plus le message d'erreur exact de Supabase.
+
+Les trois pannes les plus fréquentes, dans l'ordre :
+
+1. **Les variables ont été ajoutées après le déploiement.** Elles ne
+   s'appliquent qu'au suivant. Deployments → … → Redeploy.
+2. **C'est la clé `anon` qui a été collée dans `SUPABASE_SERVICE_ROLE_KEY`.**
+   RLS n'ayant aucune politique, toutes les tables paraissent vides : le
+   catalogue s'affiche vide, sans erreur. `/api/health` lit le rôle inscrit
+   dans la clé et le dit.
+3. **Le schéma a été exécuté sur un autre projet Supabase** que celui dont
+   l'URL est dans Vercel.
+
+Le back office affiche toujours l'état en haut : `local`, `supabase`, ou
+`erreur` en rouge avec le message.
+
 ### Et sans les variables ?
 
 Le site fonctionne quand même. Au chargement il interroge `/api/products` ;

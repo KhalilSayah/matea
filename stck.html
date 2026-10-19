@@ -1,0 +1,889 @@
+<title>MATEA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&display=swap">
+<style>
+/* Layout: sticker-flat lollipop over a photoreal canvas glass, on one sticky scroll-scrub stage. */
+:root{
+  --ink:#0E0E0C; --ink-2:#171714; --ink-3:#24241F;
+  --cream:#F4F0E6; --cream-dim:#A8A49A;
+  --tea:#D98A2B; --tea-lt:#F0B661;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ink);color:var(--cream);font-family:var(--sans);margin:0;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.025em;line-height:.92;text-wrap:balance;text-transform:uppercase}
+p{margin:0}
+/* width:100% matters inside .stage: auto margins on a grid item cancel stretch,
+   so without it the wrapper shrinks to its widest line of text */
+.wrap{width:100%;padding-inline:20px;max-width:620px;margin-inline:auto}
+
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px 4px}
+.mark{font-weight:900;font-size:19px;letter-spacing:-.02em}
+.chip{display:inline-block;background:var(--cream);color:var(--ink);font-weight:900;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 9px;border-radius:4px;transform:rotate(-2deg)}
+.navr{display:flex;align-items:center;gap:9px}
+.lang{display:flex;border:1px solid rgba(244,240,230,.26);border-radius:5px;overflow:hidden;flex:none}
+.lang button{background:none;border:0;color:var(--cream-dim);font-family:var(--sans);font-weight:900;
+  font-size:9.5px;letter-spacing:.07em;padding:5px 8px;cursor:pointer;line-height:1.4}
+.lang button[aria-pressed="true"]{background:var(--cream);color:var(--ink)}
+.lang button:focus-visible{outline:2px solid var(--tea);outline-offset:-2px}
+
+/* ---- stage ---- */
+.track{position:relative;height:430svh}
+/* the column is explicit: .caps holds only absolutely positioned children, so an
+   implicit auto track would collapse to the width of the scroll cue */
+.stage{position:sticky;top:env(safe-area-inset-top,0px);height:88svh;min-height:530px;display:grid;grid-template-rows:1fr auto;grid-template-columns:minmax(0,1fr);overflow:hidden}
+.scene{position:relative;min-height:0}
+.scene canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+.caps{position:relative;height:clamp(134px,20vw,158px)}
+.cap{position:absolute;inset:0;display:flex;flex-direction:column;gap:9px;will-change:opacity,transform}
+.cap h1{font-size:clamp(32px,9.6vw,44px)}
+.cap h1 i{font-style:normal;color:var(--tea-lt)}
+.cap p{font-size:13.5px;line-height:1.45;color:var(--cream-dim);max-width:34ch;font-weight:500}
+
+.cue{display:flex;align-items:center;gap:9px;padding-block:14px 11px;font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim)}
+.cue i{display:block;height:1px;width:40px;background:linear-gradient(90deg,var(--cream-dim),transparent)}
+.rail{height:2px;background:var(--ink-3);border-radius:2px;overflow:hidden;margin-bottom:10px}
+.rail span{display:block;height:100%;width:0;background:var(--tea)}
+
+/* ---- bands ---- */
+.band{padding-block:clamp(54px,12vw,84px)}
+.eyebrow{font-size:9.5px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--tea);margin-bottom:13px}
+.lede{font-size:clamp(27px,8vw,38px);font-weight:900;text-transform:uppercase;letter-spacing:-.025em;line-height:.95;margin-bottom:16px}
+.copy{font-size:15px;line-height:1.6;color:#C6C2B8;max-width:56ch;font-weight:400}
+
+.specs{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:26px}
+.specs div{background:var(--cream);color:var(--ink);padding:15px 14px;border-radius:4px}
+.specs dt{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:5px}
+.specs dd{margin:0;font-size:25px;font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.specs dd s{text-decoration:none;font-size:12px;font-weight:700;opacity:.5;margin-left:2px}
+
+/* ---- flavour deck: swipe across, tap to turn a card over ---- */
+.deck{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+  margin-inline:-20px;padding:6px 20px 22px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.card{flex:0 0 min(76%,290px);scroll-snap-align:center;perspective:1300px;background:none;border:0;padding:0;
+  font:inherit;color:inherit;text-align:left;text-transform:none;letter-spacing:normal;
+  cursor:pointer;-webkit-tap-highlight-color:transparent}
+.flip{position:relative;width:100%;aspect-ratio:3/4;transform-style:preserve-3d;
+  transition:transform .72s cubic-bezier(.22,.74,.2,1)}
+.card[aria-pressed="true"] .flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:20px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+
+/* front: the stick on black, under glass */
+.front{background:radial-gradient(120% 90% at 50% 34%,#201C16 0%,#0E0E0C 68%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 18px 40px rgba(0,0,0,.6)}
+.media{position:absolute;left:0;right:0;top:0;height:72%;display:grid;place-items:center;overflow:hidden}
+.media img{width:100%;height:100%;object-fit:cover;object-position:50% 49%;display:block}
+/* the photo stand-ins carry their own grey backdrop, so feather it into the card.
+   A cut-out PNG needs none of this: drop the "photo" class and it sits on the black. */
+.media.photo img{-webkit-mask-image:radial-gradient(circle at 50% 48%,#000 29%,rgba(0,0,0,.55) 42%,transparent 56%);
+  mask-image:radial-gradient(circle at 50% 48%,#000 29%,rgba(0,0,0,.55) 42%,transparent 56%);transform:scale(1.12)}
+.halo{position:absolute;left:50%;top:34%;width:76%;aspect-ratio:1;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(217,138,43,.4),rgba(217,138,43,0) 66%);pointer-events:none}
+.sheen{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(116deg,transparent 28%,rgba(255,255,255,.1) 44%,rgba(255,255,255,.02) 52%,transparent 64%)}
+
+.glass{position:absolute;left:10px;right:10px;bottom:10px;padding:13px 14px 12px;border-radius:14px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+  background:linear-gradient(150deg,rgba(255,255,255,.17),rgba(255,255,255,.045));
+  -webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 26px rgba(0,0,0,.45)}
+.glass h3{font-size:17px;line-height:1.02;letter-spacing:-.02em}
+.glass .sub{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(244,240,230,.62);margin-top:5px}
+.price{flex:none;background:var(--cream);color:var(--ink);font-size:12px;font-weight:900;
+  letter-spacing:-.01em;padding:5px 8px;border-radius:5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* back: white */
+.back{transform:rotateY(180deg);background:linear-gradient(155deg,#FFFDF8,#EFEAE0);color:var(--ink);
+  padding:20px 18px;display:flex;flex-direction:column;gap:0;
+  box-shadow:inset 0 0 0 1px rgba(14,14,12,.14),0 18px 40px rgba(0,0,0,.55)}
+.back::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(118deg,transparent 34%,rgba(255,255,255,.75) 48%,transparent 60%)}
+.back h3{font-size:19px;line-height:1;letter-spacing:-.025em}
+.back .in{font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#9A6A28;margin:16px 0 8px}
+.back ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px}
+.back li{font-size:11px;font-weight:700;background:rgba(14,14,12,.07);padding:4px 8px;border-radius:20px}
+.back .note{font-size:13px;line-height:1.5;margin-top:14px;font-weight:500;color:#45423B}
+.back .foot{margin-top:auto;padding-top:14px;border-top:1px solid rgba(14,14,12,.13);
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.back .foot b{font-size:17px;font-weight:900;font-variant-numeric:tabular-nums}
+.back .foot span{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.5}
+
+.turn{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.12);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.26);font-size:12px;line-height:1;color:var(--cream)}
+.back .turn{background:rgba(14,14,12,.07);border-color:rgba(14,14,12,.16);color:var(--ink)}
+.card:focus-visible .flip{outline:3px solid var(--tea);outline-offset:4px;border-radius:20px}
+
+.dots{display:flex;gap:7px;justify-content:center;margin-top:-4px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--ink-3);transition:background .25s,width .25s}
+.dots i.on{width:18px;background:var(--tea)}
+
+@media (prefers-reduced-motion:reduce){.flip{transition:none}}
+
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:20px;margin-top:4px}
+.step{display:grid;grid-template-columns:28px 1fr;gap:13px;min-width:0}
+.step::before{counter-increment:s;content:counter(s);font-size:13px;font-weight:900;color:var(--ink);background:var(--cream);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin-top:2px}
+.step b{font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:-.015em;display:block;margin-bottom:4px}
+.step p{font-size:14px;line-height:1.55;color:#BCB8AE;font-weight:400}
+
+.cta{background:var(--cream);color:var(--ink);border-radius:6px;padding:26px 20px}
+.cta h2{font-size:clamp(26px,7.4vw,34px)}
+.cta p{font-size:13.5px;margin-top:10px;line-height:1.5;font-weight:500;opacity:.68}
+form{display:flex;gap:7px;margin-top:17px;flex-wrap:wrap}
+input{flex:1 1 170px;min-width:0;background:#fff;border:2px solid var(--ink);color:var(--ink);font-family:var(--sans);font-weight:600;font-size:15px;padding:12px 13px;border-radius:4px}
+input::placeholder{color:#9A968C}
+input:focus-visible,button:focus-visible{outline:3px solid var(--tea);outline-offset:2px}
+/* scoped to the form: the flavour cards are buttons too, and inherited
+   text-transform/letter-spacing would leak onto everything inside them */
+form button{background:var(--ink);color:var(--cream);border:0;font-family:var(--sans);font-weight:900;text-transform:uppercase;letter-spacing:.03em;font-size:14px;padding:12px 20px;border-radius:4px;cursor:pointer}
+.ok{font-size:12px;font-weight:800;color:#2E6B2A;margin-top:11px;opacity:1}
+#trail{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
+footer{border-top:1px solid var(--ink-3);padding-block:24px 32px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim)}
+</style>
+
+<canvas id="trail" aria-hidden="true"></canvas>
+
+<div class="wrap">
+  <div class="nav">
+    <div class="mark">MATEA</div>
+    <div class="navr">
+      <div class="chip">Tea on a stick</div>
+      <div class="lang" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="track" id="track">
+  <div class="stage">
+    <div class="scene"><canvas id="c" aria-label="Une sucette de thé qui fond dans une tasse d'eau chaude au fil du défilement" data-t="canvasA" data-tattr="aria-label"></canvas></div>
+    <div class="wrap">
+      <div class="caps" id="caps">
+        <div class="cap" data-in="0" data-out="0.13"><h1>Tea on<br>a <i>stick</i>.</h1><p data-t="p1">Un bâton, une tasse. Fais défiler pour le faire fondre.</p></div>
+        <div class="cap" data-in="0.17" data-out="0.36"><h1 data-t="h2">Plonge-le<br><i>dedans.</i></h1><p data-t="p2">Eau chaude, eau glacée, lait. Peu importe.</p></div>
+        <div class="cap" data-in="0.40" data-out="0.72"><h1 data-t="h3">Regarde-le<br><i>fondre.</i></h1><p data-t="p3">Pas de sachet à repêcher. Pas de cuillère. Pas de boîte à ranger.</p></div>
+        <div class="cap" data-in="0.78" data-out="1.01"><h1 data-t="h4">C'est<br><i>tout.</i></h1><p data-t="p4">Hibiscus &amp; gingembre, camomille &amp; lavande, menthe &amp; fenouil. 70 DA pièce.</p></div>
+      </div>
+      <div class="cue" id="cue"><i></i><span data-t="cue">Fais défiler</span></div>
+      <div class="rail"><span id="rail"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="band">
+    <div class="eyebrow" data-t="whyEye">Pourquoi un bâton</div>
+    <p class="lede" data-t="whyLede">Un sachet garde le thé loin de toi.</p>
+    <p class="copy" data-t="whyCopy">Un bâton fond dans l'eau au lieu d'infuser derrière du papier. Des plantes entières prises dans le caramel, sur un manche en bouleau — tu vois chaque feuille et chaque racine avant de les plonger. Tourne jusqu'à ce que la tête ait disparu, retire le bâton, c'est prêt. Rien à filtrer, rien à jeter sauf le bâton.</p>
+    <dl class="specs">
+      <div><dt data-t="sp1">Par bâton</dt><dd>9<s>g</s></dd></div>
+      <div><dt data-t="sp2">Donne</dt><dd>250<s>ml</s></dd></div>
+      <div><dt data-t="sp3">Fond en</dt><dd>40<s>s</s></dd></div>
+      <div><dt data-t="sp4">Prix</dt><dd>70<s>DA</s></dd></div>
+    </dl>
+  </section>
+
+  <section class="band">
+    <div class="eyebrow" data-t="deckEye">Trois pour commencer</div>
+    <p class="lede" data-t="deckLede">Fais glisser.<br>Touche une carte pour la retourner.</p>
+    <div class="deck" id="deck">
+
+      <button class="card" type="button" aria-pressed="false">
+        <div class="flip">
+          <div class="face front">
+            <div class="halo"></div>
+            <div class="media photo"><img src="img/hibiscus.webp" alt="A caramel stick set with hibiscus, lemon and ginger" loading="lazy" decoding="async"></div>
+            <div class="sheen"></div>
+            <div class="turn" aria-hidden="true">↻</div>
+            <div class="glass">
+              <div><h3>Hibiscus<br>&amp; Gingembre</h3><span class="sub" data-t="tapTurn">Touche pour retourner</span></div>
+              <span class="price">70 DA</span>
+            </div>
+          </div>
+          <div class="face back">
+            <h3>Hibiscus<br>&amp; Gingembre</h3>
+            <div class="in" data-t="inStick">Dans ce bâton</div>
+            <ul><li>Hibiscus</li><li>Citron</li><li>Gingembre</li><li>Caramel</li></ul>
+            <p class="note" data-t="n1">Acidulé, rouge profond, avec le gingembre qui arrive tard au fond de la gorge.</p>
+            <div class="foot"><b>70 DA</b><span data-t="perStick">la pièce</span></div>
+            <div class="turn" aria-hidden="true">↺</div>
+          </div>
+        </div>
+      </button>
+
+      <button class="card" type="button" aria-pressed="false">
+        <div class="flip">
+          <div class="face front">
+            <div class="halo"></div>
+            <div class="media photo"><img src="img/camomille.webp" alt="A caramel stick set with chamomile, lavender and verbena" loading="lazy" decoding="async"></div>
+            <div class="sheen"></div>
+            <div class="turn" aria-hidden="true">↻</div>
+            <div class="glass">
+              <div><h3>Camomille<br>&amp; Lavande</h3><span class="sub">Tap to turn</span></div>
+              <span class="price">70 DA</span>
+            </div>
+          </div>
+          <div class="face back">
+            <h3>Camomille<br>&amp; Lavande</h3>
+            <div class="in">In this stick</div>
+            <ul><li>Camomille</li><li>Lavande</li><li>Verveine</li><li>Caramel</li></ul>
+            <p class="note" data-t="n2">Doux, floral, à peine sucré. Celui de la fin de journée.</p>
+            <div class="foot"><b>70 DA</b><span>per stick</span></div>
+            <div class="turn" aria-hidden="true">↺</div>
+          </div>
+        </div>
+      </button>
+
+      <button class="card" type="button" aria-pressed="false">
+        <div class="flip">
+          <div class="face front">
+            <div class="halo"></div>
+            <div class="media photo"><img src="img/menthe.webp" alt="A caramel stick set with mint, fennel and ginger" loading="lazy" decoding="async"></div>
+            <div class="sheen"></div>
+            <div class="turn" aria-hidden="true">↻</div>
+            <div class="glass">
+              <div><h3>Menthe<br>&amp; Fenouil</h3><span class="sub">Tap to turn</span></div>
+              <span class="price">70 DA</span>
+            </div>
+          </div>
+          <div class="face back">
+            <h3>Menthe<br>&amp; Fenouil</h3>
+            <div class="in">In this stick</div>
+            <ul><li>Fenouil</li><li>Menthe</li><li>Gingembre</li><li>Caramel</li></ul>
+            <p class="note" data-t="n3">Frais d'abord, anisé en dessous. À boire après un long repas.</p>
+            <div class="foot"><b>70 DA</b><span>per stick</span></div>
+            <div class="turn" aria-hidden="true">↺</div>
+          </div>
+        </div>
+      </button>
+
+    </div>
+    <div class="dots" id="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+  </section>
+
+  <section class="band">
+    <div class="eyebrow" data-t="howEye">Comment ça marche</div>
+    <div class="steps">
+      <div class="step"><div><b data-t="s1t">Plonge-le</b><p data-t="s1b">La tête la première, dans 250 ml d'eau. Le bâton repose sur le bord.</p></div></div>
+      <div class="step"><div><b data-t="s2t">Tourne deux fois</b><p data-t="s2b">La tête se défait en une quarantaine de secondes. L'eau se colore au fur et à mesure.</p></div></div>
+      <div class="step"><div><b data-t="s3t">Retire-le</b><p data-t="s3b">Il ne remonte qu'un bâton de bouleau nu. Il ne reste que du thé dans la tasse.</p></div></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="cta">
+      <h2 data-t="ctaH">Le premier lot<br>arrive bientôt.</h2>
+      <p data-t="ctaP">Neuf bâtons, trois de chaque parfum — 630 DA la boîte. Laisse un email et on t'en envoie un gratuit avant que tu décides.</p>
+      <form id="f"><input id="email" type="email" required placeholder="toi@email.com" aria-label="Adresse email" data-t="emailIn" data-tattr="placeholder,aria-label"><button type="submit" data-t="ctaBtn">Envoie-m'en un</button></form>
+      <p class="ok" id="ok" data-t="okMsg" hidden>C'est noté. Guette une petite enveloppe.</p>
+    </div>
+  </section>
+
+  <footer><span>MATEA</span><span>hello@matea.co</span></footer>
+</div>
+
+<script>
+(function(){
+  var cv=document.getElementById('c'), ctx=cv.getContext('2d'), track=document.getElementById('track'),
+      rail=document.getElementById('rail'), cue=document.getElementById('cue'),
+      caps=[].slice.call(document.querySelectorAll('.cap'));
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var cl=function(v,a,b){return v<a?a:(v>b?b:v);};
+  var seg=function(p,a,b){return cl((p-a)/(b-a),0,1);};
+  var eo=function(t){return 1-Math.pow(1-t,3);};
+  var ei=function(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;};
+  var lp=function(a,b,t){return a+(b-a)*t;};
+  var rgba=function(c,a){return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';};
+  var mixc=function(a,b,t){return [Math.round(lp(a[0],b[0],t)),Math.round(lp(a[1],b[1],t)),Math.round(lp(a[2],b[2],t))];};
+
+  /* scene space: 390 x 560 */
+  /* a wide, low teacup: the bowl is shorter than it is across, so the opening
+     reads as an ellipse you look down into rather than a tall tumbler */
+  var SW=390, SH=560, CX=195;
+  var RIM=300, BASE=452, RTOP=92, RBOT=58, WALL=7, RY=26;
+  var ITOP=RIM, IBOT=BASE-5, ITR=RTOP-WALL, IBR=RBOT-WALL;
+  var LEVEL0=328;
+
+  var WATER_T=[196,214,212], WATER_B=[120,142,142];
+  var TEA_T=[238,168,66], TEA_B=[104,42,8];
+
+  /* the bowl stays wide near the rim, then tucks in toward the foot */
+  function halfAt(y){ var t=cl((y-ITOP)/(IBOT-ITOP),0,1); return lp(ITR,IBR,Math.pow(t,1.5)); }
+
+  /* blob sprite for the melt swirls */
+  var sprite=document.createElement('canvas'), SS=64;
+  sprite.width=sprite.height=SS;
+  (function(){
+    var s=sprite.getContext('2d'), g=s.createRadialGradient(SS/2,SS/2,0,SS/2,SS/2,SS/2);
+    g.addColorStop(0,'rgba(255,190,104,0.46)');
+    g.addColorStop(0.4,'rgba(208,120,34,0.2)');
+    g.addColorStop(1,'rgba(150,64,8,0)');
+    s.fillStyle=g; s.fillRect(0,0,SS,SS);
+  })();
+
+  var P=[], MAXP=200;
+  function spawn(x,y){
+    if(P.length>=MAXP) P.shift();
+    var a=Math.random()*Math.PI*2, sp=0.9+Math.random()*1.5;
+    P.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*0.7+0.5,
+            r:5+Math.random()*9,grow:0.28+Math.random()*0.4,
+            life:1,fade:0.009+Math.random()*0.009});
+  }
+  function stepP(dt,kill){
+    for(var i=P.length-1;i>=0;i--){
+      var q=P[i];
+      /* swirl field: two counter-rotating cells, so the colour threads through
+         the whole glass instead of pooling where it was released */
+      q.vx+=Math.sin(q.y*0.052+q.x*0.021)*0.1;
+      q.vy+=Math.cos(q.x*0.058-q.y*0.015)*0.075-0.028;
+      q.vx*=0.982; q.vy*=0.982;
+      q.x+=q.vx*dt; q.y+=q.vy*dt;
+      var h=halfAt(q.y)-4;
+      if(q.x<CX-h){q.x=CX-h;q.vx*=-0.5;} if(q.x>CX+h){q.x=CX+h;q.vx*=-0.5;}
+      if(q.y>IBOT-6){q.y=IBOT-6;q.vy*=-0.35;}
+      if(q.y<LEVEL0+3){q.y=LEVEL0+3;q.vy*=-0.3;}
+      q.r+=q.grow*dt; q.life-=q.fade*dt*(kill?6:1);
+      if(q.life<=0||q.r>62) P.splice(i,1);
+    }
+  }
+
+  function interior(c){
+    c.beginPath();
+    c.moveTo(CX-ITR,ITOP);
+    c.bezierCurveTo(CX-ITR+1,ITOP+54,CX-IBR-18,IBOT-26,CX-IBR,IBOT-9);
+    c.quadraticCurveTo(CX-IBR,IBOT,CX-IBR+11,IBOT);
+    c.lineTo(CX+IBR-11,IBOT);
+    c.quadraticCurveTo(CX+IBR,IBOT,CX+IBR,IBOT-9);
+    c.bezierCurveTo(CX+IBR+18,IBOT-26,CX+ITR-1,ITOP+54,CX+ITR,ITOP);
+    c.closePath();
+  }
+
+  /* --- the lollipop, drawn flat like the brand stickers --- */
+  function lolly(c,x,y,ang,headR,melt,above){
+    c.save(); c.translate(x,y); c.rotate(ang);
+    c.lineCap='round'; c.lineJoin='round';
+    /* handle: from head centre downward is -y, stick goes up out of the cup */
+    c.strokeStyle='#0E0E0C'; c.lineWidth=15;
+    c.beginPath(); c.moveTo(0,-6); c.lineTo(0,-128); c.stroke();
+    c.strokeStyle='#F4F0E6'; c.lineWidth=9;
+    c.beginPath(); c.moveTo(0,-6); c.lineTo(0,-128); c.stroke();
+
+    if(headR>1.2){
+      /* ragged edge as it dissolves */
+      c.beginPath();
+      for(var i=0;i<=46;i++){
+        var a=i/46*Math.PI*2;
+        var n=1+melt*0.28*Math.sin(a*7+melt*11)+melt*0.17*Math.sin(a*13-melt*7);
+        var rr=headR*n;
+        var px=Math.cos(a)*rr, py=Math.sin(a)*rr;
+        if(i===0) c.moveTo(px,py); else c.lineTo(px,py);
+      }
+      c.closePath();
+      c.fillStyle='#F4F0E6'; c.fill();
+      c.strokeStyle='#0E0E0C'; c.lineWidth=5.5; c.stroke();
+
+      /* ribbon where the stick meets the head, like the sticker */
+      if(melt<0.45){
+        c.save(); c.globalAlpha=1-melt/0.45;
+        c.strokeStyle='#0E0E0C'; c.lineWidth=3.6; c.lineJoin='round';
+        var by=-headR*0.9;
+        c.beginPath();
+        c.moveTo(-2.5,by); c.quadraticCurveTo(-12,by+5,-10,by-5);
+        c.quadraticCurveTo(-8,by-13,-1.5,by-3);
+        c.moveTo(2.5,by); c.quadraticCurveTo(12,by+5,10,by-5);
+        c.quadraticCurveTo(8,by-13,1.5,by-3);
+        c.stroke(); c.restore();
+      }
+
+      /* face */
+      var fo=cl(1-melt*1.9,0,1);
+      if(fo>0.02 && headR>14){
+        c.globalAlpha=fo; c.fillStyle='#0E0E0C';
+        var ex=headR*0.33, ey=-headR*0.18, er=headR*0.105;
+        c.beginPath(); c.arc(-ex,ey,er,0,6.2832); c.fill();
+        c.beginPath(); c.arc(ex,ey,er,0,6.2832); c.fill();
+        c.strokeStyle='#0E0E0C'; c.lineWidth=headR*0.1; c.lineCap='round';
+        c.beginPath(); c.arc(0,headR*0.02,headR*0.42,0.55,Math.PI-0.55); c.stroke();
+        c.globalAlpha=1;
+      }
+    }
+    c.restore();
+  }
+
+  var dpr=1, W=0, H=0;
+  function resize(){
+    var r=cv.parentNode.getBoundingClientRect();
+    dpr=Math.min(window.devicePixelRatio||1,2.5);
+    W=Math.max(1,r.width); H=Math.max(1,r.height);
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+  }
+
+  var prog=0;
+  function measure(){
+    var r=track.getBoundingClientRect(), total=r.height-window.innerHeight;
+    prog=total<=0?0:cl(-r.top/total,0,1);
+  }
+
+  var last=0;
+  function draw(now){
+    var dt=last?cl((now-last)/16.667,0,3):1; last=now;
+    var t=now/1000, p=prog;
+
+    var drop=ei(seg(p,.08,.30)), melt=seg(p,.32,.70), settle=seg(p,.70,.84),
+        lift=ei(seg(p,.76,.94)), conc=eo(Math.min(1,melt*1.06));
+
+    /* lollipop position: head centre */
+    var headY=lp(152,396,drop), headR=36*(1-eo(melt));
+    var tiltA=lp(0.22,0.06,drop);
+    if(lift>0){ headY=lp(396,160,lift); tiltA=lp(0.06,0.3,lift); headR=0; }
+    var headX=CX+lp(16,0,drop)+lift*34;
+
+    /* the head displaces water, so the level lifts slightly while it is under */
+    var submerged=cl((headY-LEVEL0)/40,0,1);
+    var level=LEVEL0-4.5*submerged*(1-lift);
+
+    if(!reduce && melt>0.005 && melt<0.995 && headR>1){
+      for(var s=0;s<3;s++){
+        var sa=Math.random()*Math.PI*2, sr=headR*(0.6+Math.random()*0.75);
+        spawn(headX+Math.cos(sa)*sr, headY+Math.sin(sa)*sr);
+      }
+    }
+    if(!reduce) stepP(dt, melt>=0.985);
+
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H);
+    var sc=Math.min(W/SW,H/SH);
+    ctx.translate((W-SW*sc)/2,(H-SH*sc)/2); ctx.scale(sc,sc);
+
+    /* backlight glow behind the cup, warms as the tea builds */
+    var gg=ctx.createRadialGradient(CX,380,10,CX,380,210);
+    gg.addColorStop(0,'rgba(217,138,43,'+(0.30*conc+0.045).toFixed(3)+')');
+    gg.addColorStop(1,'rgba(217,138,43,0)');
+    ctx.fillStyle=gg; ctx.beginPath(); ctx.ellipse(CX,380,206,150,0,0,6.2832); ctx.fill();
+
+    /* contact shadow */
+    ctx.fillStyle='rgba(0,0,0,0.55)';
+    ctx.beginPath(); ctx.ellipse(CX,BASE+14,RTOP+42,15,0,0,6.2832); ctx.fill();
+
+    /* saucer */
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(CX,BASE+9,RTOP+36,25,0,0,6.2832);
+    var sag=ctx.createLinearGradient(CX-RTOP-36,0,CX+RTOP+36,0);
+    sag.addColorStop(0,'rgba(244,240,230,0.17)');
+    sag.addColorStop(0.35,'rgba(244,240,230,0.035)');
+    sag.addColorStop(0.72,'rgba(244,240,230,0.05)');
+    sag.addColorStop(1,'rgba(244,240,230,0.2)');
+    ctx.fillStyle=sag; ctx.fill();
+    ctx.strokeStyle='rgba(244,240,230,0.34)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.6;
+    ctx.beginPath(); ctx.ellipse(CX,BASE+9,RTOP+36,25,0,Math.PI*0.16,Math.PI*0.72); ctx.stroke();
+    ctx.strokeStyle='rgba(244,240,230,0.18)'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.ellipse(CX,BASE+7,RBOT+22,15,0,0,6.2832); ctx.stroke();
+    ctx.restore();
+
+    /* caustic pooled on the saucer */
+    var cg=ctx.createRadialGradient(CX,BASE+12,2,CX,BASE+12,112);
+    cg.addColorStop(0,'rgba(240,182,97,'+(0.46*conc).toFixed(3)+')');
+    cg.addColorStop(0.5,'rgba(217,138,43,'+(0.15*conc).toFixed(3)+')');
+    cg.addColorStop(1,'rgba(217,138,43,0)');
+    ctx.fillStyle=cg; ctx.beginPath(); ctx.ellipse(CX,BASE+12,112,22,0,0,6.2832); ctx.fill();
+
+    /* handle, behind the bowl */
+    ctx.save();
+    ctx.lineCap='round';
+    ctx.strokeStyle='rgba(244,240,230,0.2)'; ctx.lineWidth=13;
+    ctx.beginPath();
+    ctx.moveTo(CX+RTOP-12,RIM+30);
+    ctx.bezierCurveTo(CX+RTOP+44,RIM+34,CX+RTOP+40,BASE-40,CX+RBOT+6,BASE-24);
+    ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=2.2;
+    ctx.beginPath();
+    ctx.moveTo(CX+RTOP-10,RIM+25);
+    ctx.bezierCurveTo(CX+RTOP+39,RIM+30,CX+RTOP+35,BASE-44,CX+RBOT+6,BASE-30);
+    ctx.stroke();
+    ctx.restore();
+
+    /* --- liquid --- */
+    ctx.save();
+    interior(ctx); ctx.clip();
+
+    var ct=mixc(WATER_T,TEA_T,conc), cb=mixc(WATER_B,TEA_B,conc);
+    var la=lp(0.16,0.97,conc);
+    var lg=ctx.createLinearGradient(0,level,0,IBOT);
+    lg.addColorStop(0,rgba(ct,la*0.86));
+    lg.addColorStop(0.55,rgba(mixc(ct,cb,0.5),la));
+    lg.addColorStop(1,rgba(cb,Math.min(1,la*1.05)));
+    ctx.fillStyle=lg; ctx.fillRect(CX-RTOP-4,level,(RTOP+4)*2,IBOT-level+6);
+
+    /* submerged part of the lollipop: offset and tinted by the liquid */
+    ctx.save();
+    ctx.beginPath(); ctx.rect(CX-RTOP-6,level,(RTOP+6)*2,IBOT-level+8); ctx.clip();
+    ctx.globalAlpha=lp(1,0.6,conc*0.8);
+    ctx.translate(2.5,0);
+    lolly(ctx,headX,headY,tiltA,headR,melt,false);
+    ctx.globalAlpha=1;
+    ctx.fillStyle=rgba(cb,la*0.5); ctx.fillRect(CX-RTOP-6,level,(RTOP+6)*2,IBOT-level+8);
+    ctx.restore();
+
+    /* melt swirls */
+    if(P.length){
+      ctx.globalCompositeOperation='lighter';
+      for(var i=0;i<P.length;i++){
+        var q=P[i], a=q.life*q.life*0.2*(0.3+0.7*conc);
+        if(a<=0.01) continue;
+        ctx.globalAlpha=a;
+        ctx.drawImage(sprite,q.x-q.r,q.y-q.r,q.r*2,q.r*2);
+      }
+      ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
+    }
+
+    /* edge absorption: more liquid to look through at the sides */
+    var eg=ctx.createLinearGradient(CX-RTOP,0,CX+RTOP,0);
+    eg.addColorStop(0,'rgba(10,6,2,'+(0.5*la).toFixed(3)+')');
+    eg.addColorStop(0.2,'rgba(10,6,2,0)');
+    eg.addColorStop(0.8,'rgba(10,6,2,0)');
+    eg.addColorStop(1,'rgba(10,6,2,'+(0.5*la).toFixed(3)+')');
+    ctx.fillStyle=eg; ctx.fillRect(CX-RTOP,level,RTOP*2,IBOT-level+6);
+    ctx.restore();
+
+    /* --- surface --- */
+    var hl=halfAt(level), ry=RY*(hl/ITR);
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(CX,level,hl,ry,0,0,6.2832);
+    var sg=ctx.createLinearGradient(0,level-ry,0,level+ry);
+    sg.addColorStop(0,rgba(mixc(ct,[255,255,255],0.3),Math.min(1,la*0.9)));
+    sg.addColorStop(1,rgba(mixc(ct,cb,0.6),Math.min(1,la)));
+    ctx.fillStyle=sg; ctx.fill();
+    /* bright meniscus at the far edge */
+    ctx.strokeStyle='rgba(255,236,206,'+(0.1+0.3*conc).toFixed(3)+')';
+    ctx.lineWidth=1.6; ctx.beginPath();
+    ctx.ellipse(CX,level,hl-1,ry-0.6,0,Math.PI*1.08,Math.PI*1.92); ctx.stroke();
+    ctx.restore();
+
+    /* smiley surfacing once the tea is made */
+    var fo=Math.min(seg(p,.84,.90),1-seg(p,.95,1.0));
+    if(fo>0.02){
+      ctx.save(); ctx.globalAlpha=fo*0.5;
+      ctx.translate(CX,level); ctx.scale(1,ry/hl*2.0);
+      ctx.fillStyle='rgba(58,22,4,1)'; ctx.strokeStyle='rgba(58,22,4,1)';
+      ctx.lineWidth=4.4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.arc(-20,-8,3.6,0,6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(20,-8,3.6,0,6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(0,-2,25,0.6,Math.PI-0.6); ctx.stroke();
+      ctx.restore();
+    }
+
+    /* --- glass body over the liquid --- */
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(CX-RTOP,RIM);
+    ctx.bezierCurveTo(CX-RTOP+1,RIM+56,CX-RBOT-20,BASE-28,CX-RBOT,BASE-10);
+    ctx.quadraticCurveTo(CX-RBOT,BASE,CX-RBOT+12,BASE);
+    ctx.lineTo(CX+RBOT-12,BASE);
+    ctx.quadraticCurveTo(CX+RBOT,BASE,CX+RBOT,BASE-10);
+    ctx.bezierCurveTo(CX+RBOT+20,BASE-28,CX+RTOP-1,RIM+56,CX+RTOP,RIM);
+    ctx.closePath();
+    var wg=ctx.createLinearGradient(CX-RTOP,0,CX+RTOP,0);
+    wg.addColorStop(0,'rgba(244,240,230,0.22)');
+    wg.addColorStop(0.12,'rgba(244,240,230,0.05)');
+    wg.addColorStop(0.3,'rgba(244,240,230,0.015)');
+    wg.addColorStop(0.72,'rgba(244,240,230,0.03)');
+    wg.addColorStop(0.9,'rgba(244,240,230,0.11)');
+    wg.addColorStop(1,'rgba(244,240,230,0.26)');
+    ctx.fillStyle=wg; ctx.fill();
+    ctx.strokeStyle='rgba(244,240,230,0.26)'; ctx.lineWidth=1.3; ctx.stroke();
+    ctx.restore();
+
+    /* specular down the left of the bowl */
+    ctx.save();
+    var spg=ctx.createLinearGradient(0,RIM+20,0,BASE-20);
+    spg.addColorStop(0,'rgba(255,255,255,0)');
+    spg.addColorStop(0.2,'rgba(255,255,255,0.30)');
+    spg.addColorStop(0.78,'rgba(255,255,255,0.1)');
+    spg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.strokeStyle=spg; ctx.lineWidth=5; ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(CX-RTOP+16,RIM+24);
+    ctx.quadraticCurveTo(CX-RTOP+20,BASE-56,CX-RBOT+14,BASE-18);
+    ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=2.4;
+    ctx.beginPath();
+    ctx.moveTo(CX+RTOP-13,RIM+30);
+    ctx.quadraticCurveTo(CX+RTOP-16,BASE-58,CX+RBOT-12,BASE-22);
+    ctx.stroke();
+    ctx.restore();
+
+    /* rim: the defining line of a wide cup, so it carries the brightest highlight */
+    ctx.strokeStyle='rgba(244,240,230,0.5)'; ctx.lineWidth=2.6;
+    ctx.beginPath(); ctx.ellipse(CX,RIM,RTOP,RY,0,0,6.2832); ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.lineWidth=2.6;
+    ctx.beginPath(); ctx.ellipse(CX,RIM,RTOP,RY,0,Math.PI*1.1,Math.PI*1.66); ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1.6;
+    ctx.beginPath(); ctx.ellipse(CX,RIM,RTOP,RY,0,Math.PI*0.2,Math.PI*0.62); ctx.stroke();
+
+    /* foot */
+    ctx.strokeStyle='rgba(255,241,220,'+(0.26+0.4*conc).toFixed(3)+')'; ctx.lineWidth=2.6;
+    ctx.beginPath(); ctx.ellipse(CX,BASE-3,RBOT-6,9,0,0.2,Math.PI-0.2); ctx.stroke();
+
+    /* lollipop above the water line */
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0,0,SW,level); ctx.clip();
+    lolly(ctx,headX,headY,tiltA,headR,melt,true);
+    ctx.restore();
+
+    /* steam */
+    var st=0.2+0.8*conc;
+    ctx.save();
+    ctx.strokeStyle='rgba(244,240,230,'+(0.17*st).toFixed(3)+')';
+    ctx.lineWidth=2.4; ctx.lineCap='round';
+    for(var w=0;w<3;w++){
+      var ph=reduce?0:t*0.55+w*2.1, rise=(ph%1), bx=CX-36+w*36;
+      ctx.globalAlpha=Math.sin(rise*Math.PI)*0.9;
+      var by=level-16-rise*46;
+      ctx.beginPath(); ctx.moveTo(bx,by);
+      ctx.bezierCurveTo(bx-11,by-16,bx+11,by-26,bx-3,by-44);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    /* captions + rail */
+    for(var k=0;k<caps.length;k++){
+      var el=caps[k], a0=+el.dataset.in, b0=+el.dataset.out;
+      /* the first caption is already on screen at rest, so it never fades in */
+      var fin=a0<=0?1:seg(p,a0,a0+.05);
+      var o=Math.min(fin,1-seg(p,b0-.05,b0));
+      el.style.opacity=o.toFixed(2);
+      el.style.transform='translateY('+((1-o)*16).toFixed(1)+'px)';
+      el.style.pointerEvents=o>.5?'auto':'none';
+    }
+    cue.style.opacity=(1-seg(p,.01,.06)).toFixed(2);
+    rail.style.width=(p*100).toFixed(2)+'%';
+
+    requestAnimationFrame(draw);
+  }
+
+  addEventListener('scroll',measure,{passive:true});
+  addEventListener('resize',function(){resize();measure();});
+  resize(); measure(); requestAnimationFrame(draw);
+
+  document.getElementById('f').addEventListener('submit',function(e){
+    e.preventDefault();
+    if(document.getElementById('email').value.indexOf('@')>0){
+      document.getElementById('ok').hidden=false; this.reset();
+    }
+  });
+})();
+
+/* ---- flavour deck: swipe to browse, tap to turn a card over ---- */
+(function(){
+  var deck=document.getElementById('deck');
+  if(!deck) return;
+  var cards=[].slice.call(deck.querySelectorAll('.card')),
+      dots=[].slice.call(document.querySelectorAll('#dots i'));
+
+  /* a tap turns the card; a drag scrolls the deck and must not turn anything */
+  cards.forEach(function(card){
+    var sx=0, sy=0, moved=false;
+    card.addEventListener('pointerdown',function(e){ sx=e.clientX; sy=e.clientY; moved=false; });
+    card.addEventListener('pointermove',function(e){
+      if(Math.abs(e.clientX-sx)>9||Math.abs(e.clientY-sy)>9) moved=true;
+    });
+    card.addEventListener('click',function(e){
+      if(moved){ e.preventDefault(); return; }
+      var on=card.getAttribute('aria-pressed')==='true';
+      card.setAttribute('aria-pressed',on?'false':'true');
+    });
+  });
+
+  var tick=null;
+  deck.addEventListener('scroll',function(){
+    if(tick) return;
+    tick=requestAnimationFrame(function(){
+      tick=null;
+      var mid=deck.scrollLeft+deck.clientWidth/2, best=0, bd=1e9;
+      cards.forEach(function(c,i){
+        var d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid);
+        if(d<bd){ bd=d; best=i; }
+      });
+      dots.forEach(function(d,i){ d.classList.toggle('on',i===best); });
+    });
+  },{passive:true});
+})();
+
+/* ---- language: French ships in the markup, English lives here ---- */
+(function(){
+  var EN={
+    /* "Tea on a stick" is the brand line: it stays English in both languages */
+    p1:'One stick, one cup. Scroll to melt it.',
+    h2:'Drop it<br><i>in.</i>',
+    p2:'Hot water, iced water, milk. It does not care.',
+    h3:'Watch it<br><i>melt.</i>',
+    p3:'No bag to fish out. No spoon. No tin on the shelf.',
+    h4:"That's<br><i>it.</i>",
+    p4:'Hibiscus &amp; gingembre, camomille &amp; lavande, menthe &amp; fenouil. 70 DA each.',
+    cue:'Scroll to melt',
+
+    whyEye:'Why a stick',
+    whyLede:'A teabag keeps the tea away from you.',
+    whyCopy:'A stick melts into the water instead of steeping behind paper. Whole botanicals set in caramel on a birch handle — you can see every leaf and root before it goes in. Stir until the head is gone, lift the stick out, done. Nothing to strain, nothing to throw away but the stick.',
+    sp1:'Per stick', sp2:'Makes', sp3:'Melts in', sp4:'Price',
+
+    deckEye:'Three to start',
+    deckLede:'Swipe across.<br>Tap one to turn it over.',
+    tapTurn:'Tap to turn',
+    inStick:'In this stick',
+    perStick:'per stick',
+    n1:'Tart and deep red, with the ginger arriving late at the back of the throat.',
+    n2:'Soft and floral, barely sweet. The one for the end of the day.',
+    n3:'Cooling first, anise underneath. Drink it after a long meal.',
+
+    howEye:'How it works',
+    s1t:'Drop it in', s1b:'Head first, into 250 ml of water. The stick rests on the rim.',
+    s2t:'Stir twice', s2b:'The head comes apart in about forty seconds. The water turns as it goes.',
+    s3t:'Lift it out', s3b:'A bare birch stick comes back. Nothing left in the cup but tea.',
+
+    ctaH:'First batch<br>ships soon.',
+    ctaP:'Nine sticks, three of each flavour — 630 DA the box. Leave an email and we will send one free before you commit.',
+    ctaBtn:'Send me one',
+    okMsg:'On the list. Watch for a small envelope.',
+
+    'emailIn:placeholder':'you@email.com',
+    'emailIn:aria-label':'Email address',
+    'canvasA:aria-label':'A tea lollipop melting into a cup of hot water as the page scrolls'
+  };
+
+  var nodes=[].slice.call(document.querySelectorAll('[data-t]'));
+  nodes.forEach(function(el){
+    el._fr=el.innerHTML;
+    var ats=el.getAttribute('data-tattr');
+    if(ats){
+      el._frA={};
+      ats.split(',').forEach(function(a){ el._frA[a]=el.getAttribute(a); });
+    }
+  });
+
+  function apply(lang){
+    var en=lang==='en';
+    nodes.forEach(function(el){
+      var k=el.getAttribute('data-t');
+      if(EN[k]!==undefined) el.innerHTML=en?EN[k]:el._fr;
+      var ats=el.getAttribute('data-tattr');
+      if(ats) ats.split(',').forEach(function(a){
+        var v=en?EN[k+':'+a]:el._frA[a];
+        if(v!==undefined) el.setAttribute(a,v);
+      });
+    });
+    document.documentElement.lang=lang;
+    [].forEach.call(document.querySelectorAll('.lang button'),function(b){
+      b.setAttribute('aria-pressed',b.getAttribute('data-lang')===lang?'true':'false');
+    });
+    try{ localStorage.setItem('matea.lang',lang); }catch(e){}
+  }
+
+  [].forEach.call(document.querySelectorAll('.lang button'),function(b){
+    b.addEventListener('click',function(){ apply(b.getAttribute('data-lang')); });
+  });
+
+  var saved=null;
+  try{ saved=localStorage.getItem('matea.lang'); }catch(e){}
+  apply(saved==='en'?'en':'fr');
+})();
+
+/* ---- caramel on your fingertip: a syrup trail that follows the drag ---- */
+(function(){
+  var cv=document.getElementById('trail');
+  if(!cv||matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var ctx=cv.getContext('2d'), dpr=1, W=0, H=0, pts=[], drops=[], run=false;
+  var LIFE=1150;
+
+  function size(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=window.innerWidth; H=window.innerHeight;
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+  }
+  size();
+  addEventListener('resize',size);
+
+  function add(x,y){
+    var n=pts.length, last=n?pts[n-1]:null;
+    var sp=last?Math.min(Math.hypot(x-last.x,y-last.y),46):0;
+    pts.push({x:x,y:y,t:performance.now(),sp:sp});
+    if(pts.length>170) pts.shift();
+    /* fast drags fling a droplet off, the way syrup does */
+    if(sp>22&&Math.random()<0.22&&drops.length<14)
+      drops.push({x:x,y:y,vx:(Math.random()-.5)*1.1,vy:Math.random()*0.5,
+                  r:2.2+Math.random()*3.4,t:performance.now()});
+    start();
+  }
+
+  function frame(now){
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H);
+    while(pts.length&&now-pts[0].t>LIFE) pts.shift();
+
+    if(pts.length>1){
+      ctx.lineCap='round'; ctx.lineJoin='round';
+      /* body of the syrup: each segment tapers with age and with how fast it was drawn */
+      for(var pass=0;pass<2;pass++){
+        for(var i=1;i<pts.length;i++){
+          var a=pts[i-1], b=pts[i], age=(now-b.t)/LIFE;
+          if(age>=1) continue;
+          var k=1-age, w=(3.2+b.sp*0.42)*k;
+          if(pass===0){
+            ctx.strokeStyle='rgba(96,44,8,'+(0.5*k*k).toFixed(3)+')';
+            ctx.lineWidth=w+3.4;
+          } else {
+            ctx.strokeStyle='rgba(206,124,38,'+(0.72*k*k).toFixed(3)+')';
+            ctx.lineWidth=w;
+          }
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+      /* wet highlight riding on top */
+      for(var j=1;j<pts.length;j++){
+        var p0=pts[j-1], p1=pts[j], ag=(now-p1.t)/LIFE;
+        if(ag>=1) continue;
+        var kk=1-ag;
+        ctx.strokeStyle='rgba(255,214,150,'+(0.4*kk*kk*kk).toFixed(3)+')';
+        ctx.lineWidth=Math.max(0.6,(1+p1.sp*0.12)*kk);
+        ctx.beginPath(); ctx.moveTo(p0.x,p0.y-1.4); ctx.lineTo(p1.x,p1.y-1.4); ctx.stroke();
+      }
+    }
+
+    for(var d=drops.length-1;d>=0;d--){
+      var q=drops[d], dage=(now-q.t)/1700;
+      if(dage>=1){ drops.splice(d,1); continue; }
+      q.vy+=0.045; q.x+=q.vx; q.y+=q.vy;
+      var dk=1-dage;
+      ctx.fillStyle='rgba(188,108,32,'+(0.62*dk*dk).toFixed(3)+')';
+      ctx.beginPath(); ctx.ellipse(q.x,q.y,q.r*dk,q.r*dk*1.25,0,0,6.2832); ctx.fill();
+      ctx.fillStyle='rgba(255,220,164,'+(0.42*dk*dk).toFixed(3)+')';
+      ctx.beginPath(); ctx.ellipse(q.x-q.r*0.26*dk,q.y-q.r*0.4*dk,q.r*0.26*dk,q.r*0.3*dk,0,0,6.2832); ctx.fill();
+    }
+
+    if(pts.length||drops.length) requestAnimationFrame(frame);
+    else { run=false; ctx.clearRect(0,0,W,H); }
+  }
+
+  function start(){ if(!run){ run=true; requestAnimationFrame(frame); } }
+
+  /* fingers only — a mouse cursor leaving syrup behind reads as a bug, not a texture */
+  if(window.PointerEvent){
+    addEventListener('pointermove',function(e){
+      if(e.pointerType==='mouse') return;
+      add(e.clientX,e.clientY);
+    },{passive:true});
+  } else {
+    addEventListener('touchmove',function(e){
+      var t=e.touches[0]; if(t) add(t.clientX,t.clientY);
+    },{passive:true});
+  }
+})();
+</script>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MATEA — Tea on a stick</title>
+<meta name="description" content="Des plantes entières prises dans le caramel, sur un bâton de bouleau. Plonge, tourne, bois. 70 DA la pièce.">
+<meta name="theme-color" content="#0E0E0C">
+
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/img/favicon.svg">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MATEA">
+<meta property="og:title" content="MATEA — Tea on a stick">
+<meta property="og:description" content="Des plantes entières prises dans le caramel, sur un bâton de bouleau. Plonge, tourne, bois. 70 DA la pièce.">
+<meta property="og:image" content="assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&display=swap">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<canvas id="trail" aria-hidden="true"></canvas>
+
+<div class="wrap">
+  <div class="nav">
+    <div class="mark">MATEA</div>
+    <div class="navr">
+      <div class="chip">Tea on a stick</div>
+      <div class="lang" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="track" id="track">
+  <div class="stage">
+    <div class="scene"><canvas id="c" aria-label="Une sucette de thé qui fond dans une tasse d'eau chaude au fil du défilement" data-t="canvasA" data-tattr="aria-label"></canvas></div>
+    <div class="wrap">
+      <div class="caps" id="caps">
+        <div class="cap" data-in="0" data-out="0.13"><h1>Tea on<br>a <i>stick</i>.</h1><p data-t="p1">Un bâton, une tasse. Fais défiler pour le faire fondre.</p></div>
+        <div class="cap" data-in="0.17" data-out="0.36"><h1 data-t="h2">Plonge-le<br><i>dedans.</i></h1><p data-t="p2">Eau chaude, eau glacée, lait. Peu importe.</p></div>
+        <div class="cap" data-in="0.40" data-out="0.72"><h1 data-t="h3">Regarde-le<br><i>fondre.</i></h1><p data-t="p3">Pas de sachet à repêcher. Pas de cuillère. Pas de boîte à ranger.</p></div>
+        <div class="cap" data-in="0.78" data-out="1.01"><h1 data-t="h4">C'est<br><i>tout.</i></h1><p data-t="p4">Hibiscus &amp; gingembre, camomille &amp; lavande, menthe &amp; fenouil. 70 DA pièce.</p></div>
+      </div>
+      <div class="cue" id="cue"><i></i><span data-t="cue">Fais défiler</span></div>
+      <div class="rail"><span id="rail"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="band">
+    <div class="eyebrow" data-t="whyEye">Pourquoi un bâton</div>
+    <p class="lede" data-t="whyLede">Un sachet garde le thé loin de toi.</p>
+    <p class="copy" data-t="whyCopy">Un bâton fond dans l'eau au lieu d'infuser derrière du papier. Des plantes entières prises dans le caramel, sur un manche en bouleau — tu vois chaque feuille et chaque racine avant de les plonger. Tourne jusqu'à ce que la tête ait disparu, retire le bâton, c'est prêt. Rien à filtrer, rien à jeter sauf le bâton.</p>
+    <dl class="specs">
+      <div><dt data-t="sp1">Par bâton</dt><dd>9<s>g</s></dd></div>
+      <div><dt data-t="sp2">Donne</dt><dd>250<s>ml</s></dd></div>
+      <div><dt data-t="sp3">Fond en</dt><dd>40<s>s</s></dd></div>
+      <div><dt data-t="sp4">Prix</dt><dd>70<s>DA</s></dd></div>
+    </dl>
+  </section>
+
+  <section class="band">
+    <div class="eyebrow" data-t="deckEye">Trois pour commencer</div>
+    <p class="lede" data-t="deckLede">Fais glisser.<br>Touche une carte pour la retourner.</p>
+    <div class="deck" id="deck">
+
+      <button class="card" type="button" aria-pressed="false">
+        <div class="flip">
+          <div class="face front">
+            <div class="halo"></div>
+            <div class="media photo"><img src="assets/img/hibiscus.webp" alt="A caramel stick set with hibiscus, lemon and ginger" loading="lazy" decoding="async"></div>
+            <div class="sheen"></div>
+            <div class="turn" aria-hidden="true">↻</div>
+            <div class="glass">
+              <div><h3>Hibiscus<br>&amp; Gingembre</h3><span class="sub" data-t="tapTurn">Touche pour retourner</span></div>
+              <span class="price">70 DA</span>
+            </div>
+          </div>
+          <div class="face back">
+            <h3>Hibiscus<br>&amp; Gingembre</h3>
+            <div class="in" data-t="inStick">Dans ce bâton</div>
+            <ul><li>Hibiscus</li><li>Citron</li><li>Gingembre</li><li>Caramel</li></ul>
+            <p class="note" data-t="n1">Acidulé, rouge profond, avec le gingembre qui arrive tard au fond de la gorge.</p>
+            <div class="foot"><b>70 DA</b><span data-t="perStick">la pièce</span></div>
+            <div class="turn" aria-hidden="true">↺</div>
+          </div>
+        </div>
+      </button>
+
+      <button class="card" type="button" aria-pressed="false">
+        <div class="flip">
+          <div class="face front">
+            <div class="halo"></div>
+            <div class="media photo"><img src="assets/img/camomille.webp" alt="A caramel stick set with chamomile, lavender and verbena" loading="lazy" decoding="async"></div>
+            <div class="sheen"></div>
+            <div class="turn" aria-hidden="true">↻</div>
+            <div class="glass">
+              <div><h3>Camomille<br>&amp; Lavande</h3><span class="sub">Tap to turn</span></div>
+              <span class="price">70 DA</span>
+            </div>
+          </div>
+          <div class="face back">
+            <h3>Camomille<br>&amp; Lavande</h3>
+            <div class="in">In this stick</div>
+            <ul><li>Camomille</li><li>Lavande</li><li>Verveine</li><li>Caramel</li></ul>
+            <p class="note" data-t="n2">Doux, floral, à peine sucré. Celui de la fin de journée.</p>
+            <div class="foot"><b>70 DA</b><span>per stick</span></div>
+            <div class="turn" aria-hidden="true">↺</div>
+          </div>
+        </div>
+      </button>
+
+      <button class="card" type="button" aria-pressed="false">
+        <div class="flip">
+          <div class="face front">
+            <div class="halo"></div>
+            <div class="media photo"><img src="assets/img/menthe.webp" alt="A caramel stick set with mint, fennel and ginger" loading="lazy" decoding="async"></div>
+            <div class="sheen"></div>
+            <div class="turn" aria-hidden="true">↻</div>
+            <div class="glass">
+              <div><h3>Menthe<br>&amp; Fenouil</h3><span class="sub">Tap to turn</span></div>
+              <span class="price">70 DA</span>
+            </div>
+          </div>
+          <div class="face back">
+            <h3>Menthe<br>&amp; Fenouil</h3>
+            <div class="in">In this stick</div>
+            <ul><li>Fenouil</li><li>Menthe</li><li>Gingembre</li><li>Caramel</li></ul>
+            <p class="note" data-t="n3">Frais d'abord, anisé en dessous. À boire après un long repas.</p>
+            <div class="foot"><b>70 DA</b><span>per stick</span></div>
+            <div class="turn" aria-hidden="true">↺</div>
+          </div>
+        </div>
+      </button>
+
+    </div>
+    <div class="dots" id="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+  </section>
+
+  <section class="band">
+    <div class="eyebrow" data-t="howEye">Comment ça marche</div>
+    <div class="steps">
+      <div class="step"><div><b data-t="s1t">Plonge-le</b><p data-t="s1b">La tête la première, dans 250 ml d'eau. Le bâton repose sur le bord.</p></div></div>
+      <div class="step"><div><b data-t="s2t">Tourne deux fois</b><p data-t="s2b">La tête se défait en une quarantaine de secondes. L'eau se colore au fur et à mesure.</p></div></div>
+      <div class="step"><div><b data-t="s3t">Retire-le</b><p data-t="s3b">Il ne remonte qu'un bâton de bouleau nu. Il ne reste que du thé dans la tasse.</p></div></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="cta">
+      <h2 data-t="ctaH">Le premier lot<br>arrive bientôt.</h2>
+      <p data-t="ctaP">Neuf bâtons, trois de chaque parfum — 630 DA la boîte. Laisse un email et on t'en envoie un gratuit avant que tu décides.</p>
+      <a class="shopcta" href="commander.html">Composer mon doypack</a>
+      <form id="f"><input id="email" type="email" required placeholder="toi@email.com" aria-label="Adresse email" data-t="emailIn" data-tattr="placeholder,aria-label"><button type="submit" data-t="ctaBtn">Envoie-m'en un</button></form>
+      <p class="ok" id="ok" data-t="okMsg" hidden>C'est noté. Guette une petite enveloppe.</p>
+    </div>
+  </section>
+
+  <footer><span>MATEA</span><span>hello@matea.co</span></footer>
+</div>
+
+<div class="dock" id="dock">
+  <a class="dockin" href="commander.html">
+    <span>
+      <b data-t="dockT">Compose ton doypack</b>
+      <i data-t="dockS">70 DA le bâton · tu choisis les parfums</i>
+    </span>
+    <em aria-hidden="true">→</em>
+  </a>
+</div>
+
+<script src="assets/js/scene.js" defer></script>
+<script src="assets/js/deck.js" defer></script>
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/caramel.js" defer></script>
+<script src="assets/js/dock.js" defer></script>
+</body>
+</html>

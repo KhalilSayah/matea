@@ -232,17 +232,35 @@ MATEA.store = (function () {
 
   var active = local;
 
+  /* Deux échecs très différents, qu'il ne faut pas confondre :
+
+       404  aucune fonction servie (site ouvert en statique, dev local)
+            -> mode local, c'est normal, on ne dit rien
+
+       5xx  les fonctions répondent mais quelque chose cloche
+            (variables d'environnement absentes, Supabase injoignable)
+            -> mode local aussi, mais on garde le message : sans ça, la
+               boutique a l'air de marcher alors qu'elle n'enregistre
+               plus rien là où il faut. */
   var ready = fetch(API + '/products', { headers: { 'Content-Type': 'application/json' } })
     .then(function (r) {
-      if (!r.ok) throw new Error('indisponible');
-      return r.json();
+      if (r.status === 404) { var soft = new Error('absent'); soft.soft = true; throw soft; }
+      return r.text().then(function (text) {
+        var data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (e) {}
+        if (!r.ok) throw new Error((data && data.error) || ('Erreur ' + r.status));
+        return data;
+      });
     })
     .then(function (rows) {
       firstList = rows;
       active = remote;
     })
-    .catch(function () {
-      active = local;          // pas de fonctions servies : on reste local
+    .catch(function (err) {
+      active = local;
+      if (!err || !err.soft) {
+        api.problem = err && err.message ? err.message : 'API injoignable';
+      }
     })
     .then(function () {
       api.mode = active.mode;
@@ -258,6 +276,7 @@ MATEA.store = (function () {
 
   var api = {
     mode: 'detecting',
+    problem: null,          // message quand /api répond mais échoue
     ready: ready,
     listProducts: proxy('listProducts'),
     saveProduct: proxy('saveProduct'),

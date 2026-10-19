@@ -1,0 +1,109 @@
+/* MATEA — /api/health
+
+   Dit pourquoi ça ne marche pas, sans rien révéler de sensible.
+
+   Ouvre https://ton-site.vercel.app/api/health dans un navigateur.
+   Avec l'en-tête x-matea-token, la réponse détaille aussi les erreurs
+   renvoyées par Supabase. */
+
+const { isAdmin, send } = require('./_lib');
+
+const SB_URL = process.env.SUPABASE_URL || '';
+const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const ADMIN = process.env.ADMIN_PASSWORD || '';
+
+/* La charge utile d'un JWT Supabase n'est pas un secret : c'est du base64
+   que n'importe qui peut lire. On s'en sert juste pour dire si la clé
+   collée est la bonne — confondre « anon » et « service_role » est
+   l'erreur la plus fréquente, et elle donne des tables vides au lieu
+   d'un message d'erreur. */
+function keyRole(jwt) {
+  try {
+    const part = String(jwt).split('.')[1];
+    if (!part) return 'illisible';
+    const json = Buffer.from(part.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+    return JSON.parse(json).role || 'inconnu';
+  } catch (e) {
+    return 'illisible';
+  }
+}
+
+module.exports = async function handler(req, res) {
+  const detailed = isAdmin(req);
+
+  const checks = {
+    SUPABASE_URL: SB_URL ? 'présente' : 'MANQUANTE',
+    SUPABASE_SERVICE_ROLE_KEY: SB_KEY ? 'présente' : 'MANQUANTE',
+    ADMIN_PASSWORD: ADMIN ? 'présent' : 'MANQUANT'
+  };
+
+  const out = { ok: false, checks, hints: [] };
+
+  if (SB_URL) {
+    try { out.host = new URL(SB_URL).host; }
+    catch (e) { out.hints.push("SUPABASE_URL n'est pas une URL valide. Attendu : https://xxxx.supabase.co"); }
+  }
+
+  if (SB_KEY) {
+    const role = keyRole(SB_KEY);
+    out.key_role = role;
+    if (role === 'anon') {
+      out.hints.push(
+        "C'est la clé « anon » qui est dans SUPABASE_SERVICE_ROLE_KEY. " +
+        "Elle est bloquée par RLS, donc toutes les tables paraissent vides. " +
+        "Reprends la clé « service_role » dans Supabase → Settings → API."
+      );
+    } else if (role !== 'service_role') {
+      out.hints.push('Rôle de clé inattendu : ' + role);
+    }
+  }
+
+  if (!SB_URL || !SB_KEY) {
+    out.hints.push(
+      "Variables absentes du déploiement en cours. Ajoute-les dans Vercel → " +
+      "Settings → Environment Variables, puis REDÉPLOIE : une variable ajoutée " +
+      "ne s'applique qu'au déploiement suivant."
+    );
+    return send(res, 200, out);
+  }
+
+  /* Aller-retour réel vers Supabase. */
+  try {
+    const r = await fetch(SB_URL.replace(/\/$/, '') + '/rest/v1/products?select=id,status&limit=5', {
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
+    });
+    const text = await r.text();
+    out.supabase_status = r.status;
+
+    if (!r.ok) {
+      out.hints.push('Supabase a répondu ' + r.status + '.');
+      if (r.status === 401) out.hints.push('Clé refusée : vérifie SUPABASE_SERVICE_ROLE_KEY.');
+      if (r.status === 404) out.hints.push("Table absente : le contenu de supabase/schema.sql n'a pas été exécuté sur CE projet.");
+      if (detailed) out.supabase_error = text.slice(0, 500);
+      else out.hints.push('Rejoue cette page avec le mot de passe admin pour voir le message exact.');
+      return send(res, 200, out);
+    }
+
+    const rows = JSON.parse(text);
+    out.products_visible = rows.length;
+
+    if (out.key_role && out.key_role !== 'service_role') {
+      /* la requête a beau passer, l'écriture des commandes, elle, échouera */
+      out.hints.push("Corrige la clé avant d'aller plus loin : avec celle-ci, les commandes seront refusées.");
+    } else if (rows.length === 0) {
+      out.hints.push(
+        "Connexion établie, mais la table products est vide. Soit le bloc " +
+        "« Catalogue de départ » de schema.sql n'a pas été exécuté, soit la clé " +
+        "utilisée est bridée par RLS."
+      );
+    } else {
+      out.ok = true;
+      out.hints.push('Tout est en place : le site doit être en mode supabase.');
+    }
+  } catch (err) {
+    out.hints.push('Impossible de joindre Supabase : ' + (detailed ? err.message : 'erreur réseau'));
+    out.hints.push("Vérifie que SUPABASE_URL est bien l'URL du projet, sans barre oblique finale.");
+  }
+
+  return send(res, 200, out);
+};
