@@ -8,3 +8,6 @@ Thumbs.db
 # variables locales
 .env
 .env.local
+
+# copies laissées par le déplacement de l'espace de travail
+matea/
