@@ -1,4 +1,8 @@
-/* MATEA — caramel trail that follows a fingertip on touch devices. */
+/* MATEA — traînée de caramel au bout du doigt.
+
+   DÉSACTIVÉE : ce fichier n'est chargé par aucune page. Il est gardé
+   tel quel pour pouvoir le remettre en deux lignes — voir le README,
+   section « La traînée de caramel ». */
 /* ---- caramel on your fingertip: a syrup trail that follows the drag ---- */
 (function(){
   var cv=document.getElementById('trail');

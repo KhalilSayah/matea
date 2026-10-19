@@ -142,14 +142,16 @@ p{margin:0}
 .cta h2{font-size:clamp(26px,7.4vw,34px)}
 .cta p{font-size:13.5px;margin-top:10px;line-height:1.5;font-weight:500;opacity:.68}
 form{display:flex;gap:7px;margin-top:17px;flex-wrap:wrap}
-input{flex:1 1 170px;min-width:0;background:#fff;border:2px solid var(--ink);color:var(--ink);font-family:var(--sans);font-weight:600;font-size:15px;padding:12px 13px;border-radius:4px}
+input{flex:1 1 170px;min-width:0;background:#fff;border:2px solid var(--ink);color:var(--ink);font-family:var(--sans);font-weight:600;font-size:16px;padding:12px 13px;border-radius:4px}
 input::placeholder{color:#9A968C}
 input:focus-visible,button:focus-visible{outline:3px solid var(--tea);outline-offset:2px}
 /* scoped to the form: the flavour cards are buttons too, and inherited
    text-transform/letter-spacing would leak onto everything inside them */
 form button{background:var(--ink);color:var(--cream);border:0;font-family:var(--sans);font-weight:900;text-transform:uppercase;letter-spacing:.03em;font-size:14px;padding:12px 20px;border-radius:4px;cursor:pointer}
 .ok{font-size:12px;font-weight:800;color:#2E6B2A;margin-top:11px;opacity:1}
-#trail{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
+/* La traînée de caramel est désactivée : son canevas n'est plus posé
+   dans la page. Pour la remettre, voir la section du README.
+#trail{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90} */
 footer{border-top:1px solid var(--ink-3);padding-block:24px 32px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim)}
 
 /* bouton vers la boutique, dans le bloc d'appel à l'action */
@@ -178,3 +180,24 @@ footer{border-top:1px solid var(--ink-3);padding-block:24px 32px;display:flex;ju
 /* bloc email : secondaire, sous le composeur */
 .cta-mail{margin-top:34px}
 .cta-mail h2{font-size:clamp(21px,5.6vw,26px)}
+
+/* ---------------------------------------------------------------
+   Gestes tactiles
+
+   touch-action: manipulation supprime le double-tap qui zoome et le
+   délai de 300 ms qui va avec, tout en laissant le pincement : celui-ci
+   est une aide d'accessibilité, on n'y touche pas. C'est aussi pour ça
+   qu'on n'écrit pas user-scalable=no dans le viewport — ça supprimerait
+   le pincement, et iOS l'ignore de toute façon.
+   --------------------------------------------------------------- */
+:root,body{touch-action:manipulation}
+
+/* Les commandes qu'on tape vite : plus de double-tap, et plus de
+   sélection de texte qui clignote quand on insiste sur + et −. */
+button,a,label,select,summary,[role="button"],.card,.slot{
+  touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent}
+
+/* La référence de commande, elle, doit rester copiable. */
+.ref,.oref,input,textarea{-webkit-user-select:text;user-select:text}

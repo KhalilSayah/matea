@@ -68,7 +68,7 @@ assets/js/scene.js      la tasse et le bâton qui fond — canvas, piloté par l
 assets/js/deck.js       le carrousel de parfums et le retournement des cartes
 assets/js/i18n.js       moteur FR / EN + textes de la landing
 assets/js/i18n.shop.js  textes des pages commande et admin
-assets/js/caramel.js    la traînée de caramel au doigt
+assets/js/caramel.js    la traînée de caramel au doigt — DÉSACTIVÉE
 assets/js/dock.js       l'appel à l'action collé en bas de la landing
 assets/js/wilayas.js    les 58 wilayas
 assets/js/composer.js   le composeur de doypack, panier et commande
@@ -394,3 +394,33 @@ un `<svg>` à `viewBox` et `height:100%` posé dans une cellule. La fenêtre du
 doypack s'en sort avec trois précautions : hauteur fixe du conteneur, pistes en
 `minmax(0,1fr)`, et le SVG en `position:absolute` pour qu'il ne participe pas
 au calcul.
+
+
+## La traînée de caramel
+
+L'effet existe toujours dans `assets/js/caramel.js` mais n'est chargé par
+aucune page. Pour le remettre sur la landing, deux lignes dans `index.html` :
+
+```html
+<!-- juste après <body> -->
+<canvas id="trail" aria-hidden="true"></canvas>
+
+<!-- avec les autres scripts, en fin de page -->
+<script src="assets/js/caramel.js" defer></script>
+```
+
+et décommente la règle `#trail` à la fin de `assets/css/styles.css`.
+
+L'effet ne se déclenche qu'au doigt et au stylet, jamais à la souris, et se
+coupe tout seul si le visiteur a demandé moins d'animations dans son système.
+
+## Gestes tactiles
+
+Le double-tap ne zoome plus : `touch-action: manipulation` est posé sur la
+racine et sur toutes les commandes. Le zoom au **pincement reste actif** —
+c'est une aide d'accessibilité, et c'est pour ça qu'on n'écrit pas
+`user-scalable=no` dans le viewport, ce qui le supprimerait (et qu'iOS ignore
+de toute façon).
+
+Tous les champs de saisie sont à 16 px au minimum : en dessous, iOS zoome
+automatiquement quand on tape dedans, et ne dézoome jamais.
