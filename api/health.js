@@ -77,10 +77,33 @@ module.exports = async function handler(req, res) {
 
     if (!r.ok) {
       out.hints.push('Supabase a répondu ' + r.status + '.');
+
+      /* PostgREST renvoie un objet { code, message, hint, details }.
+         Ces champs décrivent la panne, pas les données : on peut les
+         montrer. Le corps brut, lui, ne sort qu'avec le mot de passe. */
+      let parsed = null;
+      try { parsed = JSON.parse(text); } catch (e) {}
+      if (parsed && typeof parsed === 'object') {
+        out.supabase_code = parsed.code || null;
+        out.supabase_message = parsed.message || null;
+        if (parsed.hint) out.supabase_hint = parsed.hint;
+      } else {
+        out.supabase_body_type = (r.headers.get('content-type') || 'inconnu');
+        out.supabase_body_start = String(text).replace(/\s+/g, ' ').slice(0, 120);
+      }
+
       if (r.status === 401) out.hints.push('Clé refusée : vérifie SUPABASE_SERVICE_ROLE_KEY.');
       if (r.status === 404) out.hints.push("Table absente : le contenu de supabase/schema.sql n'a pas été exécuté sur CE projet.");
-      if (detailed) out.supabase_error = text.slice(0, 500);
-      else out.hints.push('Rejoue cette page avec le mot de passe admin pour voir le message exact.');
+      if (r.status === 403) {
+        out.hints.push(
+          "403 avec une clé service_role est anormal : cette clé ignore RLS. " +
+          "Les deux causes habituelles sont des restrictions réseau côté Supabase " +
+          "(Settings → Database → Network Restrictions, qui bloquent les IP de Vercel), " +
+          "ou les anciennes clés JWT désactivées au profit des nouvelles clés " +
+          "sb_secret_… (Settings → API Keys)."
+        );
+      }
+      if (detailed) out.supabase_raw = String(text).slice(0, 500);
       return send(res, 200, out);
     }
 
