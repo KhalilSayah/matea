@@ -110,6 +110,35 @@ module.exports = async function handler(req, res) {
     const rows = JSON.parse(text);
     out.products_visible = rows.length;
 
+    /* Le bucket d'images : il s'agit de savoir s'il existe et s'il est
+       public. Un bucket privé laisse passer l'envoi sans rien dire, puis
+       toutes les images affichent 404 — panne silencieuse, à éviter. */
+    const bucket = process.env.STORAGE_BUCKET || 'products';
+    try {
+      const b = await fetch(SB_URL.replace(/\/$/, '') + '/storage/v1/bucket/' + bucket, {
+        headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
+      });
+      if (b.ok) {
+        const info = await b.json();
+        out.storage = {
+          bucket: bucket,
+          public: info.public === true,
+          limite_octets: info.file_size_limit || null
+        };
+        if (info.public !== true) {
+          out.hints.push("Le bucket « " + bucket + " » n'est pas public : les images " +
+                         "s'enverront mais ne s'afficheront pas. Rejoue le bloc " +
+                         "« Stockage des images » de supabase/schema.sql.");
+        }
+      } else {
+        out.storage = { bucket: bucket, trouve: false, statut: b.status };
+        out.hints.push("Bucket « " + bucket + " » introuvable (" + b.status + "). " +
+                       "Exécute le bloc « Stockage des images » de supabase/schema.sql.");
+      }
+    } catch (e) {
+      out.storage = { bucket: bucket, erreur: detailed ? e.message : 'injoignable' };
+    }
+
     if (out.key_role && out.key_role !== 'service_role') {
       /* la requête a beau passer, l'écriture des commandes, elle, échouera */
       out.hints.push("Corrige la clé avant d'aller plus loin : avec celle-ci, les commandes seront refusées.");
@@ -120,8 +149,8 @@ module.exports = async function handler(req, res) {
         "utilisée est bridée par RLS."
       );
     } else {
-      out.ok = true;
-      out.hints.push('Tout est en place : le site doit être en mode supabase.');
+      out.ok = !out.storage || out.storage.public === true;
+      if (out.ok) out.hints.push('Tout est en place : catalogue et images.');
     }
   } catch (err) {
     out.hints.push('Impossible de joindre Supabase : ' + (detailed ? err.message : 'erreur réseau'));
