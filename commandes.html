@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Commandes — MATEA</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E0E0C">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&display=swap">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/shop.css">
+</head>
+<body>
+
+<div class="wrap" id="gate">
+  <div class="gate">
+    <h1 style="font-size:30px" data-t="admGateT">Back office</h1>
+    <p data-t="admGateP">En ligne, le mot de passe est vérifié par le serveur et n'apparaît jamais dans le code de la page. En local, il reste celui de config.js.</p>
+    <form id="gateForm" class="fields">
+      <label>
+        <span class="lb">Mot de passe</span>
+        <input id="gatePass" type="password" autocomplete="current-password">
+      </label>
+      <p class="err" id="gateErr" role="alert">Mot de passe incorrect.</p>
+      <button type="submit" class="send" data-t="admGateIn">Entrer</button>
+    </form>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <div class="nav">
+    <div class="mark">MATEA</div>
+    <div class="navr">
+      <div class="mode" id="modeTag"><i></i><span>local</span></div>
+      <div class="lang" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="page">
+    <a class="gohome" href="admin.html">← <span data-t="ordBackAdmin">Catalogue</span></a>
+    <h1 data-t="ordsH">Les<br><i>commandes.</i></h1>
+    <p class="intro" id="ordCount">—</p>
+
+    <div id="orders" style="margin-top:26px"></div>
+    <div class="empty" id="noOrders" hidden data-t="admNoOrders">Aucune commande pour l'instant.</div>
+
+    <p class="sidenote" id="localNote" data-t="admNote">Mode local : tout reste dans ce navigateur. Renseigne les variables d'environnement Vercel pour passer sur Supabase.</p>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/config.js" defer></script>
+<script src="assets/js/products.js" defer></script>
+<script src="assets/js/store.js" defer></script>
+<script src="assets/js/i18n.shop.js" defer></script>
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/admin-shell.js" defer></script>
+<script src="assets/js/orders.js" defer></script>
+</body>
+</html>

@@ -56,7 +56,8 @@ Puis ouvre `http://localhost:3000`. Pas de rechargement à chaud — rafraîchis
 ```
 index.html              la landing
 commander.html          la page de commande, sans compte
-admin.html              le back office
+admin.html              le catalogue
+commandes.html          les commandes
 
 assets/css/styles.css   reset, tokens de design, composants de la landing
 assets/css/shop.css     commande et back office
@@ -73,7 +74,9 @@ assets/js/dock.js       l'appel à l'action collé en bas de la landing
 api/upload.js           dépôt des images dans Supabase Storage
 assets/js/wilayas.js    les 58 wilayas
 assets/js/composer.js   le composeur de doypack, panier et commande
-assets/js/admin.js      gestion du catalogue et des commandes
+assets/js/admin-shell.js  verrou, badge et outils partagés par les deux pages admin
+assets/js/admin.js      le catalogue
+assets/js/orders.js     les commandes
 
 assets/img/             photos, image de partage, favicon
 supabase/schema.sql     tables, index et politiques RLS
@@ -242,12 +245,23 @@ suivant.
 
 `/admin`, mot de passe dans `config.js` (`matea` par défaut).
 
-- **Produits** : ajouter, modifier, supprimer un *parfum*, et le bouton **Victime**
-  qui le bascule entre « en vente » et « victime de son succès ». Dans cet état il
-  reste visible sur la boutique, en noir et blanc, avec le bandeau et un bouton
-  désactivé — la demande reste visible, la vente est coupée.
-- **Commandes** : référence, client, téléphone cliquable, contenu, total, et un
-  statut à faire avancer (nouvelle → confirmée → livrée).
+Deux pages, parce qu'on ne les ouvre pas pour les mêmes raisons :
+
+- **`/admin`** — le catalogue. Ajouter, modifier, supprimer un *parfum*, envoyer
+  son image, et le bouton **Victime** qui le bascule entre « en vente » et
+  « victime de son succès ». Dans cet état il reste visible sur la boutique et
+  sur le carrousel, en noir et blanc, avec son bandeau — la demande reste
+  visible, la vente est coupée.
+- **`/commandes`** — ce qu'on regarde tous les jours. Référence, client,
+  téléphone cliquable, wilaya et adresse, contenu par doypack, total, le statut
+  à faire avancer (nouvelle → confirmée → livrée), et la suppression.
+
+Les commandes ont leur page parce que le formulaire produit est long : sous le
+catalogue, elles auraient été à un écran et demi de défilement. Le mot de passe
+vaut pour les deux pages tant que l'onglet reste ouvert.
+
+Une commande supprimée ne se récupère pas : le bouton demande confirmation
+sur lui-même, et se réarme seul après quatre secondes.
 
 ### Le mot de passe
 

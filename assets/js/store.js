@@ -152,6 +152,11 @@ MATEA.store = (function () {
       return Promise.resolve(all[i]);
     },
 
+    deleteOrder: function (id) {
+      write(OK, read(OK, []).filter(function (x) { return x.id !== id; }));
+      return Promise.resolve();
+    },
+
     checkAdmin: function (pass) {
       return Promise.resolve(pass === (cfg.adminPass || 'matea'));
     },
@@ -236,6 +241,11 @@ MATEA.store = (function () {
       return call('/orders', { method: 'PATCH', body: { id: id, status: status } });
     },
 
+    deleteOrder: function (id) {
+      return call('/orders?id=' + encodeURIComponent(id), { method: 'DELETE' })
+        .then(function () {});
+    },
+
     /* Le mot de passe n'est jamais comparé dans le navigateur : on tente
        un appel réservé à l'admin et on regarde si le serveur l'accepte. */
     checkAdmin: function (pass) {
@@ -317,6 +327,7 @@ MATEA.store = (function () {
     createOrder: proxy('createOrder'),
     listOrders: proxy('listOrders'),
     setOrderStatus: proxy('setOrderStatus'),
+    deleteOrder: proxy('deleteOrder'),
     checkAdmin: proxy('checkAdmin'),
     uploadImage: proxy('uploadImage'),
     reset: proxy('reset'),

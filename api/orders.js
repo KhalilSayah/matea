@@ -49,6 +49,16 @@ module.exports = async function handler(req, res) {
       return send(res, 200, rows[0]);
     }
 
+    if (req.method === 'DELETE') {
+      if (!guard(res, isAdmin(req), 401, 'Non autorisé')) return;
+      const id = (req.query && req.query.id) || body(req).id;
+      if (!guard(res, id, 400, 'Identifiant manquant')) return;
+      await sb('orders?id=eq.' + encodeURIComponent(id), {
+        method: 'DELETE', prefer: 'return=minimal'
+      });
+      return send(res, 200, { ok: true });
+    }
+
     if (req.method !== 'POST') return send(res, 405, { error: 'Méthode non autorisée' });
 
     /* ---------- dépôt d'une commande ---------- */

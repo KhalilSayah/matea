@@ -32,8 +32,10 @@ window.MATEA_EN_EXTRA = {
   /* admin.html */
   admH: 'Back<br><i>office.</i>',
   admIntro: 'Add a stick flavour, take one off sale, or mark it a victim of its own success.',
-  admTabP: 'Products',
-  admTabO: 'Orders',
+  admGoOrders: 'Orders',
+  admGoOrdersS: 'Read, follow, delete',
+  ordsH: 'The<br><i>orders.</i>',
+  ordBackAdmin: 'Catalogue',
   admNew: 'New flavour',
   admName: 'Name (French)',
   admNameEn: 'Name (English)',
