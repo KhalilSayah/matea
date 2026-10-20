@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Back office — MATEA</title>
+<title>Commandes — MATEA</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0E0E0C">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
@@ -16,7 +16,6 @@
 </head>
 <body>
 
-<!-- verrou local : voir la note dans config.js -->
 <div class="wrap" id="gate">
   <div class="gate">
     <h1 style="font-size:30px" data-t="admGateT">Back office</h1>
@@ -45,58 +44,21 @@
   </div>
 
   <main class="page">
-    <a class="gohome" href="index.html">← <span data-t="backHome">Retour</span></a>
-    <h1 data-t="admH">Back<br><i>office.</i></h1>
-    <p class="intro" data-t="admIntro">Ajoute un parfum de bâton, retire-le de la vente, ou marque-le victime de son succès.</p>
+    
+    <h1 data-t="ordsH">Les<br><i>commandes.</i></h1>
+    <p class="intro" id="ordCount">—</p>
 
-    <a class="bigln" href="commandes.html">
-      <span><b data-t="admGoOrders">Les commandes</b><i data-t="admGoOrdersS">Voir, suivre, supprimer</i></span>
+    <div class="kpis" id="kpis" role="group" aria-label="Filtrer par statut"></div>
+
+    <a class="bigln" href="catalogue.html">
+      <span><b data-t="ordGoCat">Catalogue produits</b><i data-t="ordGoCatS">Parfums, prix, images, ruptures</i></span>
       <em aria-hidden="true">→</em>
     </a>
 
-    <section>
-      <div id="rows"></div>
-      <div class="empty" id="noProducts" hidden data-t="admNoProducts">Aucun produit. Ajoute le premier.</div>
+    <div id="orders" style="margin-top:20px"></div>
+    <div class="empty" id="noOrders" hidden data-t="admNoOrders">Aucune commande pour l'instant.</div>
 
-      <div class="panelbox">
-        <h3 id="formTitle" data-t="admNew">Nouveau parfum</h3>
-        <form id="pForm" class="fields">
-          <input type="hidden" id="pId">
-          <div class="grid2">
-            <label><span class="lb" data-t="admName">Nom (français)</span><input id="pName" required></label>
-            <label><span class="lb" data-t="admNameEn">Nom (anglais)</span><input id="pNameEn"></label>
-          </div>
-          <label><span class="lb" data-t="admBlurb">Description (français)</span><textarea id="pBlurb"></textarea></label>
-          <label><span class="lb" data-t="admBlurbEn">Description (anglais)</span><textarea id="pBlurbEn"></textarea></label>
-          <label><span class="lb" data-t="admIng">Plantes, séparées par des virgules</span><input id="pIng" placeholder="Hibiscus, Citron, Gingembre, Caramel"></label>
-          <div class="grid2">
-            <label><span class="lb" data-t="admPrice">Prix du bâton en DA</span><input id="pPrice" type="number" min="0" step="5" required></label>
-            <label><span class="lb" data-t="admTint">Couleur du parfum</span><input id="pTint" type="color" value="#9C4F1C"></label>
-          </div>
-          <div class="uprow">
-            <div class="upthumb" id="pThumb" aria-hidden="true"></div>
-            <div class="upside">
-              <span class="lb" data-t="admImg">Image du parfum</span>
-              <input type="file" id="pFile" accept="image/webp,image/jpeg,image/png" hidden>
-              <button type="button" class="upbtn" id="pPick" data-t="admPick">Choisir une image</button>
-              <p class="uphint" id="pUpHint" data-t="admUpHint">JPEG, PNG ou WebP. Redimensionnée avant l'envoi.</p>
-            </div>
-          </div>
-          <label><span class="lb" data-t="admImgPath">Ou un chemin déjà en place</span><input id="pImg" placeholder="assets/img/hibiscus.webp"></label>
-          <p class="err" id="pErr" role="alert"></p>
-          <div class="pbtns">
-            <button type="submit" class="go" data-t="admSave">Enregistrer</button>
-            <button type="button" id="pCancel" data-t="admCancel">Annuler</button>
-          </div>
-        </form>
-      </div>
-
-      <p class="sidenote" id="localNote" data-t="admNote">Mode local : tout reste dans ce navigateur. Renseigne les variables d'environnement Vercel pour passer sur Supabase.</p>
-      <div class="pbtns" style="margin-top:14px">
-        <button type="button" id="resetBtn" data-t="admReset">Réinitialiser le catalogue</button>
-      </div>
-    </section>
-
+    <p class="sidenote" id="localNote" data-t="admNote">Mode local : tout reste dans ce navigateur. Renseigne les variables d'environnement Vercel pour passer sur Supabase.</p>
   </main>
 </div>
 
@@ -108,6 +70,6 @@
 <script src="assets/js/i18n.shop.js" defer></script>
 <script src="assets/js/i18n.js" defer></script>
 <script src="assets/js/admin-shell.js" defer></script>
-<script src="assets/js/admin.js" defer></script>
+<script src="assets/js/orders.js" defer></script>
 </body>
 </html>

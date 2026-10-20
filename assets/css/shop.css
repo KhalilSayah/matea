@@ -351,3 +351,31 @@
 /* une commande pas encore traitée se repère d'un coup d'œil */
 .ord.fresh{border-color:var(--tea)}
 .ord.fresh .oref{color:var(--tea-lt)}
+
+/* ---- compteurs de statut, cliquables pour filtrer ---- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:22px}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{display:block;text-align:left;background:var(--ink-2);border:1px solid var(--ink-3);
+  border-radius:7px;padding:12px 12px 11px;font-family:var(--sans);color:var(--cream);
+  cursor:pointer;min-width:0}
+.kpi b{display:block;font-size:24px;font-weight:900;letter-spacing:-.04em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.kpi span{display:block;font-size:9.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cream-dim);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi:hover{border-color:var(--cream-dim)}
+.kpi:focus-visible{outline:3px solid var(--tea);outline-offset:2px}
+
+/* le filtre actif se voit : fond crème, texte sombre */
+.kpi.on{background:var(--cream);border-color:var(--cream);color:var(--ink)}
+.kpi.on span{color:rgba(14,14,12,.6)}
+
+/* une barre de couleur par statut, pour les distinguer sans lire */
+.kpi.k-new{box-shadow:inset 3px 0 0 var(--tea)}
+.kpi.k-confirmed{box-shadow:inset 3px 0 0 #5BAF5B}
+.kpi.k-shipped{box-shadow:inset 3px 0 0 #6E8F6A}
+.kpi.k-cancelled{box-shadow:inset 3px 0 0 #C8553D}
+
+/* le total n'est pas un filtre : il ne réagit pas au survol */
+.kpi-sum{grid-column:1/-1;cursor:default;background:none;border-style:dashed}
+.kpi-sum:hover{border-color:var(--ink-3)}
+.kpi-sum b{font-size:19px;color:var(--tea-lt)}

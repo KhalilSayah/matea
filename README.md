@@ -56,8 +56,8 @@ Puis ouvre `http://localhost:3000`. Pas de rechargement à chaud — rafraîchis
 ```
 index.html              la landing
 commander.html          la page de commande, sans compte
-admin.html              le catalogue
-commandes.html          les commandes
+admin.html              les commandes — l'entrée du back office
+catalogue.html          les parfums
 
 assets/css/styles.css   reset, tokens de design, composants de la landing
 assets/css/shop.css     commande et back office
@@ -75,7 +75,7 @@ api/upload.js           dépôt des images dans Supabase Storage
 assets/js/wilayas.js    les 58 wilayas
 assets/js/composer.js   le composeur de doypack, panier et commande
 assets/js/admin-shell.js  verrou, badge et outils partagés par les deux pages admin
-assets/js/admin.js      le catalogue
+assets/js/catalogue.js  les parfums
 assets/js/orders.js     les commandes
 
 assets/img/             photos, image de partage, favicon
@@ -245,20 +245,26 @@ suivant.
 
 `/admin`, mot de passe dans `config.js` (`matea` par défaut).
 
-Deux pages, parce qu'on ne les ouvre pas pour les mêmes raisons :
+Deux pages, parce qu'on ne les ouvre pas pour les mêmes raisons.
 
-- **`/admin`** — le catalogue. Ajouter, modifier, supprimer un *parfum*, envoyer
-  son image, et le bouton **Victime** qui le bascule entre « en vente » et
-  « victime de son succès ». Dans cet état il reste visible sur la boutique et
-  sur le carrousel, en noir et blanc, avec son bandeau — la demande reste
-  visible, la vente est coupée.
-- **`/commandes`** — ce qu'on regarde tous les jours. Référence, client,
-  téléphone cliquable, wilaya et adresse, contenu par doypack, total, le statut
-  à faire avancer (nouvelle → confirmée → livrée), et la suppression.
+**`/admin` — les commandes.** C'est l'entrée du back office : c'est ce qu'on
+vient voir tous les jours. Référence, client, téléphone cliquable, wilaya et
+adresse, contenu par doypack, total, le statut à faire avancer
+(nouvelle → confirmée → livrée), et la suppression.
 
-Les commandes ont leur page parce que le formulaire produit est long : sous le
-catalogue, elles auraient été à un écran et demi de défilement. Le mot de passe
-vaut pour les deux pages tant que l'onglet reste ouvert.
+En haut, quatre compteurs par statut. **Un clic filtre la liste**, un second
+clic l'enlève. Les compteurs portent toujours sur l'ensemble, jamais sur ce qui
+est affiché : filtrer sur « livrée » ferait sinon tomber les autres chiffres à
+zéro, et on ne saurait plus où on en est. Une cinquième tuile donne le total
+encaissé à terme, annulées exclues.
+
+**`/catalogue` — les parfums.** Ajouter, modifier, supprimer, envoyer une image,
+et le bouton **Victime** qui bascule entre « en vente » et « victime de son
+succès ». Dans cet état le parfum reste visible sur la boutique et sur le
+carrousel, en noir et blanc, avec son bandeau — la demande reste visible, la
+vente est coupée.
+
+Le mot de passe vaut pour les deux pages tant que l'onglet reste ouvert.
 
 Une commande supprimée ne se récupère pas : le bouton demande confirmation
 sur lui-même, et se réarme seul après quatre secondes.

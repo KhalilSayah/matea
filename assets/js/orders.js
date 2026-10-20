@@ -11,7 +11,11 @@
 
   var box = document.getElementById('orders'),
       none = document.getElementById('noOrders'),
-      count = document.getElementById('ordCount');
+      count = document.getElementById('ordCount'),
+      kpis = document.getElementById('kpis');
+
+  var all = [];        // tout ce que le serveur a renvoyé
+  var filter = null;   // statut affiché, ou null pour tout
 
   var STATUS = ['new', 'confirmed', 'shipped', 'cancelled'];
   function statusLabel(s) {
@@ -21,13 +25,48 @@
     }[s] || s;
   }
 
+  /* Les compteurs portent sur TOUT, pas sur ce qui est affiché : sinon
+     filtrer sur « livrée » ferait tomber les autres chiffres à zéro et
+     on ne saurait plus où on en est. */
+  function renderKpis() {
+    if (!kpis) return;
+    var money_total = all.filter(function (o) { return o.status !== 'cancelled'; })
+                         .reduce(function (s, o) { return s + (o.total_da || 0); }, 0);
+
+    kpis.innerHTML = STATUS.map(function (s) {
+      var n = all.filter(function (o) { return o.status === s; }).length;
+      return '<button type="button" class="kpi k-' + s + (filter === s ? ' on' : '') + '" ' +
+        'data-filter="' + s + '" aria-pressed="' + (filter === s ? 'true' : 'false') + '">' +
+        '<b>' + n + '</b><span>' + statusLabel(s) + '</span></button>';
+    }).join('') +
+    '<div class="kpi kpi-sum"><b>' + money(money_total) + '</b><span>' +
+      t('encaissé à terme', 'due in total') + '</span></div>';
+  }
+
+  function apply() {
+    renderKpis();
+    render(filter ? all.filter(function (o) { return o.status === filter; }) : all);
+  }
+
+  if (kpis) kpis.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-filter]');
+    if (!b) return;
+    var s = b.getAttribute('data-filter');
+    filter = (filter === s) ? null : s;    // un second clic enlève le filtre
+    apply();
+  });
+
   function render(list) {
     none.hidden = list.length > 0;
+    if (none.hidden === false && filter) {
+      none.textContent = t('Aucune commande dans ce statut.', 'No order with this status.');
+    }
     if (count) {
-      var fresh = list.filter(function (o) { return o.status === 'new'; }).length;
-      count.textContent = list.length + ' ' +
-        (list.length > 1 ? t('commandes', 'orders') : t('commande', 'order')) +
-        (fresh ? ' · ' + fresh + ' ' + t('à traiter', 'to handle') : '');
+      var fresh = all.filter(function (o) { return o.status === 'new'; }).length;
+      count.textContent = all.length + ' ' +
+        (all.length > 1 ? t('commandes', 'orders') : t('commande', 'order')) +
+        (fresh ? ' · ' + fresh + ' ' + t('à traiter', 'to handle') : '') +
+        (filter ? ' · ' + t('filtre : ', 'filter: ') + statusLabel(filter) : '');
     }
 
     box.innerHTML = list.map(function (o) {
@@ -72,7 +111,11 @@
   }
 
   function load() {
-    return MATEA.store.listOrders().then(render).catch(function (err) {
+    return MATEA.store.listOrders().then(function (list) {
+      all = list;
+      if (filter && !all.some(function (o) { return o.status === filter; })) filter = null;
+      apply();
+    }).catch(function (err) {
       none.hidden = false;
       none.textContent = err.message;
     });
@@ -82,7 +125,10 @@
     var sel = e.target.closest('select[data-order]');
     if (!sel) return;
     MATEA.store.setOrderStatus(sel.getAttribute('data-order'), sel.value)
-      .then(function () { toast(t('Statut mis à jour', 'Status updated')); })
+      .then(function () {
+        toast(t('Statut mis à jour', 'Status updated'));
+        return load();          // les compteurs doivent suivre
+      })
       .catch(function (err) { toast(err.message); });
   });
 
