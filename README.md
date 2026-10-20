@@ -70,6 +70,7 @@ assets/js/i18n.js       moteur FR / EN + textes de la landing
 assets/js/i18n.shop.js  textes des pages commande et admin
 assets/js/caramel.js    la traînée de caramel au doigt — DÉSACTIVÉE
 assets/js/dock.js       l'appel à l'action collé en bas de la landing
+api/upload.js           dépôt des images dans Supabase Storage
 assets/js/wilayas.js    les 58 wilayas
 assets/js/composer.js   le composeur de doypack, panier et commande
 assets/js/admin.js      gestion du catalogue et des commandes
@@ -424,3 +425,55 @@ de toute façon).
 
 Tous les champs de saisie sont à 16 px au minimum : en dessous, iOS zoome
 automatiquement quand on tape dedans, et ne dézoome jamais.
+
+
+## Les images de parfums
+
+Le back office envoie l'image directement : « Choisir une image », et le
+chemin se remplit tout seul.
+
+### Pourquoi pas les identifiants S3
+
+Supabase expose bien un endpoint compatible S3, avec clé d'accès, secret,
+endpoint et région. Mais il faut signer chaque requête en SigV4 à la main :
+une centaine de lignes de cryptographie, sans bibliothèque, pour exactement
+le même résultat. Et c'est un jeu d'identifiants de plus à garder secret.
+
+L'API Storage de Supabase accepte la clé `service_role` déjà configurée.
+Rien à ajouter dans Vercel — le bucket est créé par le schéma.
+
+### Ce qui se passe à l'envoi
+
+1. Le navigateur redimensionne l'image à 900 px de côté maximum et la
+   réencode en WebP. Une photo de téléphone de 4 Mo descend à quelques
+   dizaines de kilooctets, et elle ne sera jamais affichée plus large
+   que 400 px de toute façon.
+2. Elle part en base64 dans du JSON vers `/api/upload`, qui vérifie le
+   jeton admin, le format et le poids.
+3. La fonction la dépose dans le bucket `products` avec la clé
+   `service_role`, sous un nom assaini suivi d'un suffixe aléatoire —
+   deux « menthe.webp » ne s'écrasent pas, et le navigateur ne ressert
+   pas l'ancienne depuis son cache.
+4. L'URL publique revient et remplit le champ du formulaire.
+
+Trois barrières sur le poids, et c'est voulu : le navigateur redimensionne,
+la fonction refuse au-delà de 3 Mo, et le bucket lui-même a une limite
+`file_size_limit`. Même avec une faille côté site, rien de plus gros n'entre.
+
+Le champ texte reste disponible en dessous pour les images déjà dans
+`assets/img/`.
+
+En mode local, sans serveur, l'image est gardée en data URL dans le
+navigateur — assez pour développer, et le message le dit clairement.
+
+## Le panneau clair
+
+La section de commande de la landing est en blanc pour trancher avec le reste
+du site. Plutôt que de réécrire chaque composant, `.lightpanel` **échange les
+jetons** de surface et d'encre : tout ce qui est peint avec `var(--ink)` ou
+`var(--cream)` bascule tout seul.
+
+Les noms deviennent ironiques — `--ink` vaut une couleur claire à l'intérieur
+— mais le sens tient : `--ink` reste « le fond », `--cream` reste « ce qui
+s'écrit dessus ». Le sachet, lui, garde son noir : c'est le produit, pas
+l'interface, donc l'échange y est annulé.

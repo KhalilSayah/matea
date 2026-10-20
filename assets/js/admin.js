@@ -165,6 +165,7 @@
       document.getElementById('pPrice').value = p.price_da;
       document.getElementById('pImg').value = p.image_url || '';
       document.getElementById('pTint').value = p.tint || '#9C4F1C';
+      showThumb(p.image_url || '');
       formTitle.textContent = t('Modifier : ', 'Edit: ') + p.name;
       pForm.scrollIntoView({ block: 'center', behavior: 'smooth' });
       document.getElementById('pName').focus();
@@ -183,12 +184,94 @@
     }
   });
 
+  /* ---------- image du parfum ---------- */
+
+  var pickBtn = document.getElementById('pPick'),
+      fileIn = document.getElementById('pFile'),
+      thumb = document.getElementById('pThumb'),
+      upHint = document.getElementById('pUpHint');
+
+  function showThumb(url) {
+    if (url) {
+      thumb.style.backgroundImage = 'url("' + url.replace(/"/g, '%22') + '")';
+      thumb.classList.add('has');
+    } else {
+      thumb.style.backgroundImage = '';
+      thumb.classList.remove('has');
+    }
+  }
+
+  function hint(msg, bad) {
+    upHint.textContent = msg;
+    upHint.classList.toggle('bad', Boolean(bad));
+  }
+
+  /* Redimensionne avant d'envoyer : une photo de téléphone fait 4 Mo et
+     ne sera jamais affichée plus large que 400 px. On la ramène à 900 px
+     et on la réencode en WebP — l'envoi passe de quelques mégaoctets à
+     quelques dizaines de kilooctets. */
+  function shrink(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var MAX = 900;
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var scale = Math.min(1, MAX / Math.max(w, h));
+        var cv = document.createElement('canvas');
+        cv.width = Math.round(w * scale);
+        cv.height = Math.round(h * scale);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        cv.toBlob(function (blob) {
+          if (!blob) return resolve(file);          // navigateur récalcitrant : on envoie l'original
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.webp',
+                           { type: 'image/webp' }));
+        }, 'image/webp', 0.82);
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error(t('Image illisible.', 'Unreadable image.')));
+      };
+      img.src = url;
+    });
+  }
+
+  pickBtn.addEventListener('click', function () { fileIn.click(); });
+
+  fileIn.addEventListener('change', function () {
+    var file = fileIn.files && fileIn.files[0];
+    if (!file) return;
+    pickBtn.disabled = true;
+    hint(t('Préparation…', 'Preparing…'));
+
+    shrink(file).then(function (small) {
+      hint(t('Envoi… ', 'Uploading… ') + Math.round(small.size / 1024) + ' Ko');
+      return MATEA.store.uploadImage(small);
+    }).then(function (res) {
+      document.getElementById('pImg').value = res.url;
+      showThumb(res.url);
+      hint(res.local
+        ? t('Mode local : gardée dans ce navigateur, pas envoyée.',
+            'Local mode: kept in this browser, not uploaded.')
+        : t('Envoyée.', 'Uploaded.'));
+    }).catch(function (err) {
+      hint(err.message, true);
+    }).then(function () {
+      pickBtn.disabled = false;
+      fileIn.value = '';
+    });
+  });
+
   function clearForm() {
     editing = null;
     pForm.reset();
     document.getElementById('pId').value = '';
     document.getElementById('pTint').value = '#9C4F1C';
     pErr.classList.remove('on');
+    showThumb('');
+    hint(t("JPEG, PNG ou WebP. Redimensionnée avant l'envoi.",
+           'JPEG, PNG or WebP. Resized before upload.'));
     formTitle.textContent = t('Nouveau parfum', 'New flavour');
   }
   document.getElementById('pCancel').addEventListener('click', clearForm);

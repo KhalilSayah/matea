@@ -384,10 +384,14 @@
   addEventListener('resize',function(){resize();measure();});
   resize(); measure(); requestAnimationFrame(draw);
 
-  document.getElementById('f').addEventListener('submit',function(e){
+  /* Le formulaire d'email a été retiré de la landing : on commande
+     directement. Le garde reste pour qu'une page qui le remettrait
+     continue de marcher. */
+  var mail = document.getElementById('f');
+  if (mail) mail.addEventListener('submit', function (e) {
     e.preventDefault();
-    if(document.getElementById('email').value.indexOf('@')>0){
-      document.getElementById('ok').hidden=false; this.reset();
+    if (document.getElementById('email').value.indexOf('@') > 0) {
+      document.getElementById('ok').hidden = false; this.reset();
     }
   });
 })();

@@ -264,3 +264,60 @@
   font-size:12.5px;font-weight:700;line-height:1.5;padding:12px 14px;border-radius:6px;margin-bottom:18px}
 .mode.broken{border-color:#C8553D;color:#E08A75}
 .mode.broken i{background:#C8553D}
+
+/* ---------------------------------------------------------------
+   Panneau clair
+
+   La section de commande est en blanc pour trancher avec le reste du
+   site. Plutôt que de réécrire chaque composant, on échange ici les
+   jetons de surface et d'encre : tout ce qui est peint avec
+   var(--ink) / var(--cream) bascule tout seul.
+
+   Les noms deviennent ironiques — --ink vaut une couleur claire — mais
+   le sens tient : --ink reste « le fond », --cream reste « ce qui
+   s'écrit dessus ». Rien d'autre à maintenir.
+
+   Le sachet, lui, garde son noir : c'est le produit, pas l'interface.
+   --------------------------------------------------------------- */
+.lightpanel{
+  --ink:#F7F5EF;          /* le fond du panneau */
+  --ink-2:#EFEBE1;        /* les creux : cartouches, champs */
+  --ink-3:#DBD5C7;        /* les traits de séparation */
+  --cream:#14130F;        /* le texte */
+  --cream-dim:#6E695E;    /* le texte secondaire */
+  --tea:#9A6A28;          /* assez sombre pour tenir sur du blanc */
+  --tea-lt:#8A4A12;
+  background:var(--ink);
+  color:var(--cream);
+  border-radius:14px;
+  padding:clamp(20px,5vw,34px) clamp(16px,4.5vw,28px) clamp(26px,6vw,38px);
+  margin-top:26px;
+  box-shadow:0 24px 60px rgba(0,0,0,.45)}
+
+/* Ces trois-là portent une couleur en dur, posée pour le fond sombre. */
+.lightpanel .copy{color:#45423B}
+.lightpanel .flmt span{color:var(--cream-dim)}
+.lightpanel .bhint{color:var(--cream-dim)}
+
+/* Le sachet reste sombre : on annule l'échange à l'intérieur. */
+.lightpanel .bpouch{--cream:#F4F0E6;--ink:#0E0E0C}
+.lightpanel .builder{background:var(--ink-2);border-color:var(--ink-3)}
+
+/* Les vignettes de parfum ont un fond propre sur blanc. */
+.lightpanel .flth{background:var(--ink-2)}
+
+/* ---- envoi d'image dans le back office ---- */
+.uprow{display:grid;grid-template-columns:72px 1fr;gap:13px;align-items:start}
+.upthumb{width:72px;height:92px;border-radius:4px 4px 9px 9px;background:var(--ink);
+  box-shadow:inset 0 0 0 1px var(--ink-3);background-size:cover;background-position:50% 48%;
+  display:grid;place-items:center}
+.upthumb::after{content:"—";color:var(--cream-dim);font-size:13px;font-weight:800}
+.upthumb.has::after{content:none}
+.upside{min-width:0}
+.upbtn{width:100%;background:var(--ink-2);border:1px solid var(--ink-3);color:var(--cream);
+  font-family:var(--sans);font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;
+  padding:11px;border-radius:5px;cursor:pointer}
+.upbtn:hover:not(:disabled){border-color:var(--cream)}
+.upbtn:disabled{opacity:.6;cursor:wait}
+.uphint{font-size:11px;line-height:1.45;color:var(--cream-dim);margin-top:7px;font-weight:600}
+.uphint.bad{color:#E08A75}

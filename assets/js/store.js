@@ -73,6 +73,20 @@ MATEA.store = (function () {
     };
   }
 
+  /* Le fichier part en base64 dans du JSON : Vercel analyse déjà le JSON,
+     ça évite d'écrire un analyseur multipart pour trois images. */
+  function fileToBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        var s = String(fr.result);
+        resolve({ name: file.name, type: file.type, data: s.slice(s.indexOf(',') + 1) });
+      };
+      fr.onerror = function () { reject(new Error('Lecture du fichier impossible')); };
+      fr.readAsDataURL(file);
+    });
+  }
+
   /* ---------- adaptateur local (ce navigateur seulement) ---------- */
 
   var PK = 'matea.products', OK = 'matea.orders';
@@ -140,6 +154,18 @@ MATEA.store = (function () {
 
     checkAdmin: function (pass) {
       return Promise.resolve(pass === (cfg.adminPass || 'matea'));
+    },
+
+    /* Pas de serveur en local : l'image devient une data URL, stockée
+       avec le produit. Suffisant pour développer, à ne pas confondre
+       avec un vrai envoi. */
+    uploadImage: function (file) {
+      return new Promise(function (resolve, reject) {
+        var fr = new FileReader();
+        fr.onload = function () { resolve({ url: fr.result, local: true }); };
+        fr.onerror = function () { reject(new Error('Lecture du fichier impossible')); };
+        fr.readAsDataURL(file);
+      });
     },
 
     reset: function () {
@@ -223,6 +249,12 @@ MATEA.store = (function () {
         });
     },
 
+    uploadImage: function (file) {
+      return fileToBase64(file).then(function (payload) {
+        return call('/upload', { method: 'POST', body: payload });
+      });
+    },
+
     reset: function () {
       return Promise.reject(new Error('Réinitialisation indisponible en ligne'));
     }
@@ -286,6 +318,7 @@ MATEA.store = (function () {
     listOrders: proxy('listOrders'),
     setOrderStatus: proxy('setOrderStatus'),
     checkAdmin: proxy('checkAdmin'),
+    uploadImage: proxy('uploadImage'),
     reset: proxy('reset'),
     newRef: newRef,
     normalise: normalise

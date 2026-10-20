@@ -147,3 +147,23 @@ values
    'Cooling first, anise underneath. Drink it after a long meal.',
    '{Fenouil,Menthe,Gingembre,Caramel}', 70, '#6E8F6A', 'assets/img/menthe.webp', 'active', 3)
 on conflict (slug) do nothing;
+
+
+-- ---------------------------------------------------------------
+-- Stockage des images
+--
+-- Un bucket public : les photos de parfums sont servies directement
+-- par Supabase, sans passer par le site. L'écriture, elle, reste
+-- réservée au serveur — api/upload.js dépose avec la clé service_role,
+-- qui ignore les politiques de storage.
+--
+-- file_size_limit est une deuxième barrière après celle de la fonction :
+-- même avec une faille côté site, rien de plus gros ne rentre.
+-- ---------------------------------------------------------------
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('products', 'products', true, 3145728,
+        array['image/webp', 'image/jpeg', 'image/png'])
+on conflict (id) do update
+  set public = true,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;

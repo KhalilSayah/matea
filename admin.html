@@ -73,7 +73,16 @@
             <label><span class="lb" data-t="admPrice">Prix du bâton en DA</span><input id="pPrice" type="number" min="0" step="5" required></label>
             <label><span class="lb" data-t="admTint">Couleur du parfum</span><input id="pTint" type="color" value="#9C4F1C"></label>
           </div>
-          <label><span class="lb" data-t="admImg">Chemin de l'image</span><input id="pImg" placeholder="assets/img/hibiscus.webp"></label>
+          <div class="uprow">
+            <div class="upthumb" id="pThumb" aria-hidden="true"></div>
+            <div class="upside">
+              <span class="lb" data-t="admImg">Image du parfum</span>
+              <input type="file" id="pFile" accept="image/webp,image/jpeg,image/png" hidden>
+              <button type="button" class="upbtn" id="pPick" data-t="admPick">Choisir une image</button>
+              <p class="uphint" id="pUpHint" data-t="admUpHint">JPEG, PNG ou WebP. Redimensionnée avant l'envoi.</p>
+            </div>
+          </div>
+          <label><span class="lb" data-t="admImgPath">Ou un chemin déjà en place</span><input id="pImg" placeholder="assets/img/hibiscus.webp"></label>
           <p class="err" id="pErr" role="alert"></p>
           <div class="pbtns">
             <button type="submit" class="go" data-t="admSave">Enregistrer</button>
