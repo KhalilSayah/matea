@@ -80,10 +80,14 @@ module.exports = async function handler(req, res) {
     if (req.method === 'DELETE') {
       const id = (req.query && req.query.id) || body(req).id;
       if (!guard(res, id, 400, 'Identifiant manquant')) return;
-      /* On archive au lieu de détruire : une commande passée garde la
-         trace du parfum commandé. */
+      /* Suppression réelle. C'est sans danger pour l'historique : une
+         commande garde un instantané du parfum — nom, prix, quantité —
+         dans sa colonne items, et ne pointe pas vers cette ligne. Les
+         commandes passées restent donc lisibles telles qu'elles étaient.
+         L'image, elle, reste dans le bucket : la retirer casserait les
+         vignettes des anciennes commandes si tu en affiches un jour. */
       await sb('products?id=eq.' + encodeURIComponent(id), {
-        method: 'PATCH', body: { status: 'archived' }, prefer: 'return=minimal'
+        method: 'DELETE', prefer: 'return=minimal'
       });
       return send(res, 200, { ok: true });
     }

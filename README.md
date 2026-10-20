@@ -477,3 +477,15 @@ Les noms deviennent ironiques — `--ink` vaut une couleur claire à l'intérieu
 — mais le sens tient : `--ink` reste « le fond », `--cream` reste « ce qui
 s'écrit dessus ». Le sachet, lui, garde son noir : c'est le produit, pas
 l'interface, donc l'échange y est annulé.
+
+
+## Le carrousel de la landing
+
+Les cartes qui se retournent viennent du catalogue, comme le composeur : un
+parfum ajouté dans le back office y apparaît sans toucher au HTML. Un parfum
+marqué **victime de son succès** y reste, en noir et blanc, avec son bandeau
+en travers et « indisponible » au dos — la demande continue de se voir, la
+vente est coupée.
+
+Le texte des cartes vient de la base, donc il n'a pas de clés de traduction :
+remplis les champs anglais du formulaire pour qu'elles basculent aussi.

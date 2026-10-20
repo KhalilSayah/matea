@@ -20,12 +20,6 @@
 
     deckEye:'Three to start',
     deckLede:'Swipe across.<br>Tap one to turn it over.',
-    tapTurn:'Tap to turn',
-    inStick:'In this stick',
-    perStick:'per stick',
-    n1:'Tart and deep red, with the ginger arriving late at the back of the throat.',
-    n2:'Soft and floral, barely sweet. The one for the end of the day.',
-    n3:'Cooling first, anise underneath. Drink it after a long meal.',
 
     howEye:'How it works',
     s1t:'Drop it in', s1b:'Head first, into 250 ml of water. The stick rests on the rim.',

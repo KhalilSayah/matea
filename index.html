@@ -74,79 +74,8 @@
   <section class="band">
     <div class="eyebrow" data-t="deckEye">Trois pour commencer</div>
     <p class="lede" data-t="deckLede">Fais glisser.<br>Touche une carte pour la retourner.</p>
-    <div class="deck" id="deck">
-
-      <button class="card" type="button" aria-pressed="false">
-        <div class="flip">
-          <div class="face front">
-            <div class="halo"></div>
-            <div class="media photo"><img src="assets/img/hibiscus.webp" alt="A caramel stick set with hibiscus, lemon and ginger" loading="lazy" decoding="async"></div>
-            <div class="sheen"></div>
-            <div class="turn" aria-hidden="true">↻</div>
-            <div class="glass">
-              <div><h3>Hibiscus<br>&amp; Gingembre</h3><span class="sub" data-t="tapTurn">Touche pour retourner</span></div>
-              <span class="price">70 DA</span>
-            </div>
-          </div>
-          <div class="face back">
-            <h3>Hibiscus<br>&amp; Gingembre</h3>
-            <div class="in" data-t="inStick">Dans ce bâton</div>
-            <ul><li>Hibiscus</li><li>Citron</li><li>Gingembre</li><li>Caramel</li></ul>
-            <p class="note" data-t="n1">Acidulé, rouge profond, avec le gingembre qui arrive tard au fond de la gorge.</p>
-            <div class="foot"><b>70 DA</b><span data-t="perStick">la pièce</span></div>
-            <div class="turn" aria-hidden="true">↺</div>
-          </div>
-        </div>
-      </button>
-
-      <button class="card" type="button" aria-pressed="false">
-        <div class="flip">
-          <div class="face front">
-            <div class="halo"></div>
-            <div class="media photo"><img src="assets/img/camomille.webp" alt="A caramel stick set with chamomile, lavender and verbena" loading="lazy" decoding="async"></div>
-            <div class="sheen"></div>
-            <div class="turn" aria-hidden="true">↻</div>
-            <div class="glass">
-              <div><h3>Camomille<br>&amp; Lavande</h3><span class="sub">Tap to turn</span></div>
-              <span class="price">70 DA</span>
-            </div>
-          </div>
-          <div class="face back">
-            <h3>Camomille<br>&amp; Lavande</h3>
-            <div class="in">In this stick</div>
-            <ul><li>Camomille</li><li>Lavande</li><li>Verveine</li><li>Caramel</li></ul>
-            <p class="note" data-t="n2">Doux, floral, à peine sucré. Celui de la fin de journée.</p>
-            <div class="foot"><b>70 DA</b><span>per stick</span></div>
-            <div class="turn" aria-hidden="true">↺</div>
-          </div>
-        </div>
-      </button>
-
-      <button class="card" type="button" aria-pressed="false">
-        <div class="flip">
-          <div class="face front">
-            <div class="halo"></div>
-            <div class="media photo"><img src="assets/img/menthe.webp" alt="A caramel stick set with mint, fennel and ginger" loading="lazy" decoding="async"></div>
-            <div class="sheen"></div>
-            <div class="turn" aria-hidden="true">↻</div>
-            <div class="glass">
-              <div><h3>Menthe<br>&amp; Fenouil</h3><span class="sub">Tap to turn</span></div>
-              <span class="price">70 DA</span>
-            </div>
-          </div>
-          <div class="face back">
-            <h3>Menthe<br>&amp; Fenouil</h3>
-            <div class="in">In this stick</div>
-            <ul><li>Fenouil</li><li>Menthe</li><li>Gingembre</li><li>Caramel</li></ul>
-            <p class="note" data-t="n3">Frais d'abord, anisé en dessous. À boire après un long repas.</p>
-            <div class="foot"><b>70 DA</b><span>per stick</span></div>
-            <div class="turn" aria-hidden="true">↺</div>
-          </div>
-        </div>
-      </button>
-
-    </div>
-    <div class="dots" id="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    <div class="deck" id="deck" aria-live="polite"></div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
   </section>
 
   <section class="band">

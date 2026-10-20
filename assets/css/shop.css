@@ -321,3 +321,12 @@
 .upbtn:disabled{opacity:.6;cursor:wait}
 .uphint{font-size:11px;line-height:1.45;color:var(--cream-dim);margin-top:7px;font-weight:600}
 .uphint.bad{color:#E08A75}
+
+/* ---- carte en rupture dans le carrousel de la landing ---- */
+.card.sold .media img{filter:grayscale(1) brightness(.62)}
+.card.sold .halo{opacity:.25}
+.card.sold .price{background:var(--ink-3);color:var(--cream-dim)}
+.sticker{position:absolute;inset:0;display:grid;place-items:center;z-index:3;pointer-events:none}
+.sticker span{background:var(--cream);color:var(--ink);font-size:11px;font-weight:900;line-height:1.2;
+  letter-spacing:.02em;text-transform:uppercase;text-align:center;padding:9px 13px;border-radius:5px;
+  transform:rotate(-8deg);box-shadow:0 8px 22px rgba(0,0,0,.65)}

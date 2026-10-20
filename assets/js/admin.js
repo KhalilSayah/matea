@@ -175,7 +175,7 @@
       /* confirmation en deux temps, dans le bouton lui-même : les boîtes de
          dialogue natives sont bloquées par certains hébergeurs et pénibles
          au doigt. Le bouton se réarme tout seul après quatre secondes. */
-      if (!arm(b, t('Confirmer ?', 'Confirm?'), t('Suppr.', 'Delete'))) return;
+      if (!arm(b, t('Supprimer ?', 'Delete?'), t('Suppr.', 'Delete'))) return;
       MATEA.store.deleteProduct(id).then(function () {
         products = products.filter(function (x) { return x.id !== id; });
         renderProducts();
