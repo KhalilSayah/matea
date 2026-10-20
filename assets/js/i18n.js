@@ -39,6 +39,9 @@
     ctaBtn:'Send me one',
     okMsg:'On the list. Watch for a small envelope.',
 
+    footLead:'A question, or a bulk order?<br>We answer.',
+    footCall:'Call us',
+
     'emailIn:placeholder':'you@email.com',
     'emailIn:aria-label':'Email address',
     'canvasA:aria-label':'A tea lollipop melting into a cup of hot water as the page scrolls'
