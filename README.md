@@ -518,7 +518,10 @@ colonne **NON ECOM**, prix **STOP DESK** — retrait en agence, pas à domicile.
 Le client le voit écrit sur le récapitulatif, il ne le découvre pas devant le
 livreur.
 
-**41 wilayas sur 58 sont tarifées** (450 à 700 DA). Les 17 autres ne figurent
+**Tlemcen est offerte** — c'est là que part la marchandise.
+
+**41 wilayas sur 58 sont tarifées** (Tlemcen gratuite, les autres de 450 à
+700 DA). Les 17 autres ne figurent
 pas sur la grille : Adrar, Béchar, Tamanrasset, Skikda, Illizi, Tindouf,
 Tissemsilt, Khenchela et les neuf wilayas du Sud créées en 2019. Pour
 celles-là le récapitulatif affiche « tarif confirmé par téléphone », la
@@ -547,6 +550,16 @@ Une seule ligne dans `assets/js/wilayas.js` :
 { code: '16', name: 'Alger', livraison: 500 },
 ```
 
-`livraison: null` remet la wilaya en « tarif confirmé par téléphone ».
+Trois états, à ne pas confondre :
+
+| `livraison` | affichage | facturé |
+| --- | --- | --- |
+| un nombre | le tarif | le tarif |
+| `0` | **Offerte** | 0 DA |
+| `null` | tarif confirmé par téléphone | 0 DA |
+
+`0` et `null` facturent tous les deux zéro, mais ne disent pas la même chose
+au client : l'un est une promesse tenue, l'autre un montant encore inconnu.
+C'est `find()` qu'il faut interroger pour les distinguer, pas `livraison()`.
 Passer en livraison à domicile, c'est reprendre la colonne DOMICILE de la
 grille — les prix sont 100 à 150 DA plus hauts.

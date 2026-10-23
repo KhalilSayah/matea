@@ -3,9 +3,13 @@
    Source : grille Swift Express au départ de Tlemcen, colonne NON ECOM,
    prix STOP DESK (retrait en agence, pas livraison à domicile).
 
-   livraison = null : wilaya absente de la grille. La commande passe
-   quand même, le tarif se confirme au téléphone. On n'invente pas un
-   prix qu'il faudrait ensuite renier devant le client.
+   Trois états, à ne pas confondre :
+     livraison = un nombre : le tarif, en dinars
+     livraison = 0         : livraison offerte (Tlemcen, on est sur place)
+     livraison = null      : wilaya absente de la grille. La commande passe
+                             quand même, le tarif se confirme au téléphone.
+                             On n'invente pas un prix qu'il faudrait ensuite
+                             renier devant le client.
 
    Ce fichier est lu des deux côtés — le navigateur l'inclut en <script>,
    les fonctions de /api le require(). Une seule table, donc aucun risque
@@ -29,7 +33,7 @@
     { code: '10', name: 'Bouira',              livraison: 500 },
     { code: '11', name: 'Tamanrasset',         livraison: null },
     { code: '12', name: 'Tébessa',             livraison: 550 },
-    { code: '13', name: 'Tlemcen',             livraison: 500 },
+    { code: '13', name: 'Tlemcen',             livraison: 0 },   // offerte : on est sur place
     { code: '14', name: 'Tiaret',              livraison: 500 },
     { code: '15', name: 'Tizi Ouzou',          livraison: 500 },
     { code: '16', name: 'Alger',               livraison: 500 },
@@ -89,11 +93,12 @@
     return null;
   }
 
-  /* Prix de livraison, ou 0 quand la wilaya n'est pas tarifée — le
-     montant se règle alors au téléphone. */
+  /* Montant à facturer : 0 aussi bien pour une livraison offerte que
+     pour une wilaya hors grille. Pour distinguer les deux à l'affichage,
+     c'est find() qu'il faut interroger et regarder w.livraison. */
   function livraison(label) {
     var w = find(label);
-    return w && w.livraison ? w.livraison : 0;
+    return w && typeof w.livraison === 'number' ? w.livraison : 0;
   }
 
   var api = { list: WILAYAS, find: find, livraison: livraison };

@@ -16,14 +16,14 @@
     whyEye:'Why a stick',
     whyLede:'A teabag keeps the tea away from you.',
     whyCopy:'A stick melts into the water instead of steeping behind paper. Whole botanicals set in caramel on a birch handle — you can see every leaf and root before it goes in. Stir until the head is gone, lift the stick out, done. Nothing to strain, nothing to throw away but the stick.',
-    sp1:'Per stick', sp2:'Makes', sp3:'Melts in', sp4:'Price',
+    sp3:'Melts in', sp4:'Price',
 
     deckEye:'Three to start',
     deckLede:'Swipe across.<br>Tap one to turn it over.',
 
     howEye:'How it works',
     s1t:'Drop it in', s1b:'Head first, into 250 ml of water. The stick rests on the rim.',
-    s2t:'Stir twice', s2b:'The head comes apart in about forty seconds. The water turns as it goes.',
+    s2t:'Stir twice', s2b:'The head comes apart in three to five minutes. The water turns as it goes.',
     s3t:'Lift it out', s3b:'A bare birch stick comes back. Nothing left in the cup but tea.',
 
     ctaH:'First batch<br>ships soon.',

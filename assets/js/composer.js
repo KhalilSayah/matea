@@ -367,7 +367,7 @@
 
   function renderRecap() {
     var w = deliveryNow();
-    var ship = w && w.livraison ? w.livraison : 0;
+    var ship = w && typeof w.livraison === 'number' ? w.livraison : 0;
 
     var lines = packs.map(function (d, i) {
       var ls = linesOf(d).map(function (l) { return l.qty + ' × ' + esc(l.name); }).join(', ');
@@ -388,6 +388,11 @@
         '<br><small style="color:var(--cream-dim);font-weight:600">' +
         t('stop desk · ' + w.name, 'desk pickup · ' + w.name) + '</small></span>' +
         '<span>' + money(ship) + '</span></div>';
+    } else if (w.livraison === 0) {
+      shipLine = '<div><span>' + t('Livraison', 'Delivery') +
+        '<br><small style="color:var(--cream-dim);font-weight:600">' + esc(w.name) +
+        '</small></span><span style="color:var(--tea-lt)">' +
+        t('Offerte', 'Free') + '</span></div>';
     } else {
       shipLine = '<div><span>' + t('Livraison', 'Delivery') +
         '<br><small style="color:var(--tea-lt);font-weight:700">' +
@@ -478,7 +483,8 @@
       address: adr.value.trim(),
       items: orderItems(),
       total_da: cartTotal() + (function () {
-        var w = deliveryNow(); return w && w.livraison ? w.livraison : 0;
+        var w = deliveryNow();
+        return w && typeof w.livraison === 'number' ? w.livraison : 0;
       })()
     }).then(function (order) {
       try { localStorage.setItem('matea.wilaya', wil.value); } catch (e2) {}

@@ -102,7 +102,10 @@
           '<b>' + money(o.total_da) +
             (o.delivery_da
               ? '<s>' + t('dont ', 'incl. ') + money(o.delivery_da) + t(' de livraison', ' delivery') + '</s>'
-              : '<s>' + t('livraison à confirmer', 'delivery to confirm') + '</s>') +
+              : '<s>' + (window.MATEA_WILAYAS && window.MATEA_WILAYAS.find(o.wilaya) &&
+                         window.MATEA_WILAYAS.find(o.wilaya).livraison === 0
+                  ? t('livraison offerte', 'free delivery')
+                  : t('livraison à confirmer', 'delivery to confirm')) + '</s>') +
           '</b>' +
           '<div class="oax">' +
             '<select data-order="' + esc(o.id) + '">' + opts + '</select>' +
