@@ -72,6 +72,7 @@ assets/js/i18n.shop.js  textes des pages commande et admin
 assets/js/caramel.js    la traînée de caramel au doigt — DÉSACTIVÉE
 assets/js/dock.js       l'appel à l'action collé en bas de la landing
 assets/js/theme.js      la bascule clair / sombre
+assets/js/label.js      l'étiquette de livraison et son code-barres
 api/upload.js           dépôt des images dans Supabase Storage
 assets/js/wilayas.js    les 58 wilayas et leur tarif de livraison
 assets/js/composer.js   le composeur de doypack, panier et commande
@@ -594,3 +595,38 @@ du reste, pas d'être clair en soi.
 
 Le sachet et les cartes parfums gardent aussi leur noir : ce sont des objets
 photographiés, pas des surfaces d'interface.
+
+
+## Les étiquettes de livraison
+
+Dans `/admin`, chaque commande a un bouton **Étiquette**, et un bouton au-dessus
+de la liste imprime d'un coup toutes celles affichées. Combiné aux compteurs :
+filtre sur « Confirmée », puis une seule impression pour toute la tournée.
+
+Format 100 × 150 mm, celui des imprimantes thermiques. Le dialogue
+d'impression du navigateur propose **Enregistrer en PDF**, sur ordinateur
+comme sur téléphone.
+
+### Pourquoi pas une bibliothèque PDF
+
+jsPDF ou pdf-lib pèseraient plus lourd que tout le reste du site réuni, pour
+un rendu moins fidèle : le navigateur sait déjà paginer et imprimer du HTML.
+L'étiquette est écrite dans une **iframe cachée** plutôt que dans une fenêtre,
+parce que `window.open()` se fait bloquer par les bloqueurs de pop-up.
+
+### Le code-barres
+
+Code 39, encodé dans `label.js`, dessiné en SVG pour rester net à
+l'impression. Chaque caractère y vaut neuf éléments dont exactement trois
+larges — une règle vérifiable, là où les 107 motifs d'un Code 128 ne se
+relisent pas. Les références MATEA (lettres, chiffres, tiret) entrent toutes
+dans son jeu de caractères.
+
+> **À vérifier avec une vraie douchette avant la première tournée.** La table
+> est cohérente — bon nombre d'éléments, aucun motif en double, jeu complet —
+> mais je n'ai pas pu la confronter à un lecteur. Scanne une étiquette : si la
+> référence s'affiche, tout le reste suivra.
+
+Le code-barres porte **ta** référence de commande, pas un numéro de suivi
+transporteur. Si Swift Express exige le sien, c'est lui qu'il faudra encoder,
+et il faudra alors un champ pour le stocker.

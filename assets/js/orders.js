@@ -48,6 +48,12 @@
     render(filter ? all.filter(function (o) { return o.status === filter; }) : all);
   }
 
+  var bulk = document.getElementById('printAll');
+  if (bulk) bulk.addEventListener('click', function () {
+    if (!shown.length) return toast(t('Rien à imprimer', 'Nothing to print'));
+    MATEA.label.print(shown);
+  });
+
   if (kpis) kpis.addEventListener('click', function (e) {
     var b = e.target.closest('button[data-filter]');
     if (!b) return;
@@ -56,10 +62,18 @@
     apply();
   });
 
+  var shown = [];
+
   function render(list) {
+    shown = list;
     none.hidden = list.length > 0;
     if (none.hidden === false && filter) {
       none.textContent = t('Aucune commande dans ce statut.', 'No order with this status.');
+    }
+    if (bulk) {
+      bulk.hidden = list.length === 0;
+      bulk.textContent = t('Imprimer ' + list.length + ' étiquette' + (list.length > 1 ? 's' : ''),
+                           'Print ' + list.length + ' label' + (list.length > 1 ? 's' : ''));
     }
     if (count) {
       var fresh = all.filter(function (o) { return o.status === 'new'; }).length;
@@ -109,6 +123,8 @@
           '</b>' +
           '<div class="oax">' +
             '<select data-order="' + esc(o.id) + '">' + opts + '</select>' +
+            '<button type="button" class="olbl" data-label="' + esc(o.id) + '">' +
+              t('Étiquette', 'Label') + '</button>' +
             '<button type="button" class="odel" data-del="' + esc(o.id) + '">' +
               t('Suppr.', 'Delete') + '</button>' +
           '</div>' +
@@ -140,6 +156,13 @@
   });
 
   box.addEventListener('click', function (e) {
+    var lab = e.target.closest('button[data-label]');
+    if (lab) {
+      var one = all.find(function (o) { return String(o.id) === lab.getAttribute('data-label'); });
+      if (one) MATEA.label.print(one);
+      return;
+    }
+
     var b = e.target.closest('button[data-del]');
     if (!b) return;
     /* Deux temps : une commande effacée ne se récupère pas. */
