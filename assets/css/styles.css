@@ -13,10 +13,55 @@ img{max-width:100%;display:block}
 :root{
   --ink:#0E0E0C; --ink-2:#171714; --ink-3:#24241F;
   --cream:#F4F0E6; --cream-dim:#A8A49A;
+  --body:#C6C2B8;                     /* texte courant, un cran sous --cream */
   --tea:#D98A2B; --tea-lt:#F0B661;
   --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
   color-scheme:dark;
 }
+
+/* ---------------------------------------------------------------
+   Thème clair
+
+   Les composants sont tous peints avec --ink (le fond) et --cream
+   (ce qui s'écrit dessus) : redéfinir les jetons suffit, aucune règle
+   de composant à dupliquer.
+
+   Deux exceptions plus bas, et ce sont des choix, pas des oublis :
+   la scène du héros et le panneau de commande gardent leur fond
+   sombre. Ce sont des vitrines produit, pas de l'interface.
+   --------------------------------------------------------------- */
+:root[data-theme="light"]{
+  --ink:#F4F0E6; --ink-2:#EAE4D6; --ink-3:#D7D0BE;
+  --cream:#14130F; --cream-dim:#6B665C;
+  --body:#403C35;
+  --tea:#9A6A28; --tea-lt:#7E410E;
+  color-scheme:light;
+}
+
+/* La scène reste sombre : le verre, la vapeur et la sucette sont
+   peints au canvas en clair sur fond noir, et les repeindre pour un
+   fond blanc demanderait une deuxième palette entière. */
+:root[data-theme="light"] .track{
+  --ink:#0E0E0C; --ink-2:#171714; --ink-3:#24241F;
+  --cream:#F4F0E6; --cream-dim:#A8A49A; --body:#C6C2B8;
+  --tea:#D98A2B; --tea-lt:#F0B661;
+  background:#0E0E0C;
+  color:#F4F0E6}
+:root[data-theme="light"] .track .rail{background:#24241F}
+
+/* Le pied de page garde sa deuxième surface, plus foncée que la page. */
+:root[data-theme="light"] .foot{background:var(--ink-2)}
+
+/* ---- bascule clair / sombre ---- */
+.tgl{flex:none;background:none;border:1px solid rgba(128,120,104,.45);border-radius:5px;
+  width:28px;height:24px;display:grid;place-items:center;cursor:pointer;color:var(--cream);
+  padding:0;line-height:1}
+.tgl svg{width:14px;height:14px;display:block}
+.tgl:hover{border-color:var(--cream)}
+.tgl:focus-visible{outline:2px solid var(--tea);outline-offset:2px}
+.tgl .moon{display:none}
+:root[data-theme="light"] .tgl .moon{display:block}
+:root[data-theme="light"] .tgl .sun{display:none}
 *{box-sizing:border-box}
 body{background:var(--ink);color:var(--cream);font-family:var(--sans);margin:0;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.025em;line-height:.92;text-wrap:balance;text-transform:uppercase}
@@ -58,7 +103,7 @@ p{margin:0}
 .band{padding-block:clamp(54px,12vw,84px)}
 .eyebrow{font-size:9.5px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--tea);margin-bottom:13px}
 .lede{font-size:clamp(27px,8vw,38px);font-weight:900;text-transform:uppercase;letter-spacing:-.025em;line-height:.95;margin-bottom:16px}
-.copy{font-size:15px;line-height:1.6;color:#C6C2B8;max-width:56ch;font-weight:400}
+.copy{font-size:15px;line-height:1.6;color:var(--body);max-width:56ch;font-weight:400}
 
 .specs{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:26px}
 .specs div{background:var(--cream);color:var(--ink);padding:15px 14px;border-radius:4px}

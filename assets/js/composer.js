@@ -560,7 +560,7 @@
     empty.textContent = t('Catalogue indisponible : ', 'Catalogue unavailable: ') + err.message;
   });
 
-  document.addEventListener('matea:lang', function () {
-    renderBuilder(); renderFlavours(); renderPacks();
-  });
+  function redraw() { renderBuilder(); renderFlavours(); renderPacks(); }
+  document.addEventListener('matea:lang', redraw);
+  document.addEventListener('matea:theme', redraw);
 })();

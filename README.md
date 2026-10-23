@@ -71,6 +71,7 @@ assets/js/i18n.js       moteur FR / EN + textes de la landing
 assets/js/i18n.shop.js  textes des pages commande et admin
 assets/js/caramel.js    la traînée de caramel au doigt — DÉSACTIVÉE
 assets/js/dock.js       l'appel à l'action collé en bas de la landing
+assets/js/theme.js      la bascule clair / sombre
 api/upload.js           dépôt des images dans Supabase Storage
 assets/js/wilayas.js    les 58 wilayas et leur tarif de livraison
 assets/js/composer.js   le composeur de doypack, panier et commande
@@ -563,3 +564,33 @@ au client : l'un est une promesse tenue, l'autre un montant encore inconnu.
 C'est `find()` qu'il faut interroger pour les distinguer, pas `livraison()`.
 Passer en livraison à domicile, c'est reprendre la colonne DOMICILE de la
 grille — les prix sont 100 à 150 DA plus hauts.
+
+
+## Clair et sombre
+
+Le sombre est l'identité de la marque, donc c'est lui par défaut : le site ne
+suit pas `prefers-color-scheme` au premier passage. Le bouton dans le menu
+bascule, et le choix est retenu d'une visite à l'autre.
+
+Le thème est posé sur `<html>` par un petit script **en ligne dans le `<head>`**
+de chaque page, avant le premier pixel. S'il attendait `theme.js`, la page
+s'afficherait en sombre puis sauterait en clair sous les yeux du visiteur.
+
+Comme tous les composants sont peints avec `--ink` (le fond) et `--cream` (ce
+qui s'écrit dessus), redéfinir les jetons suffit : aucune règle de composant
+n'est dupliquée.
+
+### Deux exceptions, et ce sont des choix
+
+**La scène du héros reste sombre** dans les deux thèmes. Le verre, la vapeur,
+les reflets et la sucette sont peints au canvas en clair sur fond noir ; les
+porter sur un fond blanc demanderait une deuxième palette complète de la
+scène. C'est une vitrine produit, pas de l'interface — un bandeau sombre en
+haut d'une page claire se lit très bien.
+
+**Le panneau de commande s'inverse toujours par rapport à la page** : clair sur
+le site sombre, sombre sur le site clair. Son rôle est de détacher la commande
+du reste, pas d'être clair en soi.
+
+Le sachet et les cartes parfums gardent aussi leur noir : ce sont des objets
+photographiés, pas des surfaces d'interface.

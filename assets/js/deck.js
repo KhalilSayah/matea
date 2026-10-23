@@ -120,4 +120,5 @@
   });
 
   document.addEventListener('matea:lang', render);
+  document.addEventListener('matea:theme', render);
 })();

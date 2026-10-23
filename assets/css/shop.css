@@ -217,7 +217,9 @@
 .row .ax .danger:hover{border-color:#C8553D;color:#E08A75}
 .row .ax .warn[aria-pressed="true"]{background:var(--tea);color:#160D02;border-color:var(--tea)}
 
-.tag{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+/* .row .mt span impose display:block aux spans de la ligne ; l'étiquette
+   doit reprendre la main, sinon elle s'étire sur toute la largeur. */
+.row .mt .tag,.tag{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
   padding:3px 7px;border-radius:3px;margin-top:5px}
 .tag.active{background:rgba(91,175,91,.16);color:#8FD08F}
 .tag.victime{background:rgba(217,138,43,.18);color:var(--tea-lt)}
@@ -296,6 +298,16 @@
 
 /* Ces trois-là portent une couleur en dur, posée pour le fond sombre. */
 .lightpanel .copy{color:#45423B}
+
+/* En thème clair la page est déjà claire : le panneau repasse en sombre,
+   sinon il n'y aurait plus aucun contraste. Il s'agit toujours de
+   détacher la commande du reste, pas d'être clair en soi. */
+:root[data-theme="light"] .lightpanel{
+  --ink:#14130F; --ink-2:#1E1C18; --ink-3:#2E2B25;
+  --cream:#F7F5EF; --cream-dim:#A8A296;
+  --tea:#D98A2B; --tea-lt:#F0B661;
+  box-shadow:0 20px 48px rgba(0,0,0,.28)}
+:root[data-theme="light"] .lightpanel .copy{color:#C6C2B8}
 .lightpanel .flmt span{color:var(--cream-dim)}
 .lightpanel .bhint{color:var(--cream-dim)}
 
