@@ -379,3 +379,7 @@
 .kpi-sum{grid-column:1/-1;cursor:default;background:none;border-style:dashed}
 .kpi-sum:hover{border-color:var(--ink-3)}
 .kpi-sum b{font-size:19px;color:var(--tea-lt)}
+
+/* le détail du total dans une commande */
+.ord .ofo b s{display:block;text-decoration:none;font-size:10px;font-weight:700;
+  color:var(--cream-dim);letter-spacing:.04em;text-transform:uppercase;margin-top:4px}

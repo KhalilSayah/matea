@@ -133,7 +133,7 @@ MATEA.store = (function () {
         ref: newRef(),
         first_name: o.first_name, last_name: o.last_name, phone: o.phone,
         wilaya: o.wilaya, address: o.address,
-        items: o.items, total_da: o.total_da,
+        items: o.items, delivery_da: o.delivery_da || 0, total_da: o.total_da,
         status: 'new', created_at: new Date().toISOString()
       };
       var all = read(OK, []);

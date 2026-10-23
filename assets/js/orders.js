@@ -99,7 +99,11 @@
         '</div>' +
         '<div class="oit">' + items + '</div>' +
         '<div class="ofo">' +
-          '<b>' + money(o.total_da) + '</b>' +
+          '<b>' + money(o.total_da) +
+            (o.delivery_da
+              ? '<s>' + t('dont ', 'incl. ') + money(o.delivery_da) + t(' de livraison', ' delivery') + '</s>'
+              : '<s>' + t('livraison à confirmer', 'delivery to confirm') + '</s>') +
+          '</b>' +
           '<div class="oax">' +
             '<select data-order="' + esc(o.id) + '">' + opts + '</select>' +
             '<button type="button" class="odel" data-del="' + esc(o.id) + '">' +

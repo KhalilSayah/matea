@@ -72,7 +72,7 @@ assets/js/i18n.shop.js  textes des pages commande et admin
 assets/js/caramel.js    la traînée de caramel au doigt — DÉSACTIVÉE
 assets/js/dock.js       l'appel à l'action collé en bas de la landing
 api/upload.js           dépôt des images dans Supabase Storage
-assets/js/wilayas.js    les 58 wilayas
+assets/js/wilayas.js    les 58 wilayas et leur tarif de livraison
 assets/js/composer.js   le composeur de doypack, panier et commande
 assets/js/admin-shell.js  verrou, badge et outils partagés par les deux pages admin
 assets/js/catalogue.js  les parfums
@@ -509,3 +509,44 @@ vente est coupée.
 
 Le texte des cartes vient de la base, donc il n'a pas de clés de traduction :
 remplis les champs anglais du formulaire pour qu'elles basculent aussi.
+
+
+## La livraison
+
+Le tarif par wilaya vient de la grille Swift Express au départ de Tlemcen,
+colonne **NON ECOM**, prix **STOP DESK** — retrait en agence, pas à domicile.
+Le client le voit écrit sur le récapitulatif, il ne le découvre pas devant le
+livreur.
+
+**41 wilayas sur 58 sont tarifées** (450 à 700 DA). Les 17 autres ne figurent
+pas sur la grille : Adrar, Béchar, Tamanrasset, Skikda, Illizi, Tindouf,
+Tissemsilt, Khenchela et les neuf wilayas du Sud créées en 2019. Pour
+celles-là le récapitulatif affiche « tarif confirmé par téléphone », la
+commande passe quand même, et le back office signale « livraison à confirmer »
+sur la ligne du total. Mieux vaut annoncer un tarif inconnu que d'en inventer
+un qu'il faudrait ensuite renier.
+
+### Une seule table, deux lecteurs
+
+`assets/js/wilayas.js` est lu par le navigateur **et** par
+`api/orders.js`, qui le `require()`. C'est voulu : avec deux copies, le prix
+affiché et le prix facturé finiraient par diverger.
+
+Comme pour les bâtons, **le serveur relit le tarif dans la table** et ne croit
+jamais le montant envoyé par le navigateur. Une wilaya bien formée mais
+inventée est refusée, sinon elle passerait à 0 DA de livraison.
+
+La commande garde `delivery_da` à part de `total_da`, qui est la somme. Le
+back office affiche « 840 DA · dont 700 DA de livraison ».
+
+### Changer un tarif
+
+Une seule ligne dans `assets/js/wilayas.js` :
+
+```js
+{ code: '16', name: 'Alger', livraison: 500 },
+```
+
+`livraison: null` remet la wilaya en « tarif confirmé par téléphone ».
+Passer en livraison à domicile, c'est reprendre la colonne DOMICILE de la
+grille — les prix sont 100 à 150 DA plus hauts.

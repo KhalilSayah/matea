@@ -359,16 +359,51 @@
     });
   }
 
-  function openSheet() {
-    if (!packs.length) return;
-    lastFocus = document.activeElement;
-    recap.innerHTML = packs.map(function (d, i) {
+  function deliveryNow() {
+    var sel = id('wilaya');
+    if (!sel || !sel.value || !window.MATEA_WILAYAS) return null;
+    return window.MATEA_WILAYAS.find(sel.value);
+  }
+
+  function renderRecap() {
+    var w = deliveryNow();
+    var ship = w && w.livraison ? w.livraison : 0;
+
+    var lines = packs.map(function (d, i) {
       var ls = linesOf(d).map(function (l) { return l.qty + ' × ' + esc(l.name); }).join(', ');
       return '<div><span>' + t('Doypack ', 'Pouch ') + (i + 1) +
              '<br><small style="color:var(--cream-dim);font-weight:600">' + ls + '</small></span>' +
              '<span>' + money(priceOf(d)) + '</span></div>';
-    }).join('') +
-    '<div class="tot"><span>' + t('Total', 'Total') + '</span><span>' + money(cartTotal()) + '</span></div>';
+    }).join('');
+
+    /* La livraison se montre dès que la wilaya est choisie : personne ne
+       doit découvrir le port au moment de payer au livreur. */
+    var shipLine;
+    if (!w) {
+      shipLine = '<div><span>' + t('Livraison', 'Delivery') +
+        '<br><small style="color:var(--cream-dim);font-weight:600">' +
+        t('choisis ta wilaya', 'pick your wilaya') + '</small></span><span>—</span></div>';
+    } else if (ship) {
+      shipLine = '<div><span>' + t('Livraison', 'Delivery') +
+        '<br><small style="color:var(--cream-dim);font-weight:600">' +
+        t('stop desk · ' + w.name, 'desk pickup · ' + w.name) + '</small></span>' +
+        '<span>' + money(ship) + '</span></div>';
+    } else {
+      shipLine = '<div><span>' + t('Livraison', 'Delivery') +
+        '<br><small style="color:var(--tea-lt);font-weight:700">' +
+        t('tarif confirmé par téléphone', 'price confirmed by phone') +
+        '</small></span><span>—</span></div>';
+    }
+
+    recap.innerHTML = lines + shipLine +
+      '<div class="tot"><span>' + t('Total', 'Total') + '</span><span>' +
+      money(cartTotal() + ship) + '</span></div>';
+  }
+
+  function openSheet() {
+    if (!packs.length) return;
+    lastFocus = document.activeElement;
+    renderRecap();
     formStep.hidden = false;
     doneStep.hidden = true;
     sheet.classList.add('open');
@@ -442,7 +477,9 @@
       wilaya: wil.value,
       address: adr.value.trim(),
       items: orderItems(),
-      total_da: cartTotal()
+      total_da: cartTotal() + (function () {
+        var w = deliveryNow(); return w && w.livraison ? w.livraison : 0;
+      })()
     }).then(function (order) {
       try { localStorage.setItem('matea.wilaya', wil.value); } catch (e2) {}
       packs = []; draft = {}; save();
@@ -466,16 +503,18 @@
     var sel = id('wilaya');
     if (!sel || !window.MATEA_WILAYAS) return;
     var frag = document.createDocumentFragment();
-    window.MATEA_WILAYAS.forEach(function (w) {
+    window.MATEA_WILAYAS.list.forEach(function (w) {
       var o = document.createElement('option');
-      o.value = w; o.textContent = w;
+      o.value = w.label;
+      o.textContent = w.label;
       frag.appendChild(o);
     });
     sel.appendChild(frag);
     try {
       var last = localStorage.getItem('matea.wilaya');
-      if (last && window.MATEA_WILAYAS.indexOf(last) >= 0) sel.value = last;
+      if (last && window.MATEA_WILAYAS.find(last)) sel.value = last;
     } catch (e) {}
+    sel.addEventListener('change', renderRecap);
   })();
 
   load();

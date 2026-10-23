@@ -9,9 +9,11 @@
    les outils développeur pour commander à 1 DA. */
 
 const { configured, sb, isAdmin, body, send, fail, guard, PACK_SIZE } = require('./_lib');
+const WILAYAS = require('../assets/js/wilayas.js');
 
 const PHONE = /^0[1-7]\d{8}$/;
-const WILAYA = /^\d{2} — .{3,40}$/;          // « 16 — Alger »
+/* La wilaya doit exister dans la table : une chaîne bien formée mais
+   inventée passerait sinon, et facturerait 0 DA de livraison. */
 const ORDER_STATUS = ['new', 'confirmed', 'shipped', 'cancelled'];
 
 function ref() {
@@ -72,7 +74,7 @@ module.exports = async function handler(req, res) {
     if (!guard(res, first.length >= 2 && first.length <= 60, 400, 'Prénom invalide')) return;
     if (!guard(res, last.length >= 2 && last.length <= 60, 400, 'Nom invalide')) return;
     if (!guard(res, PHONE.test(phone), 400, 'Numéro de téléphone invalide')) return;
-    if (!guard(res, WILAYA.test(wilaya), 400, 'Wilaya invalide')) return;
+    if (!guard(res, WILAYAS.find(wilaya), 400, 'Wilaya inconnue')) return;
     if (!guard(res, address.length >= 6 && address.length <= 300, 400, 'Adresse invalide')) return;
 
     const packs = Array.isArray(o.items) ? o.items : [];
@@ -120,6 +122,12 @@ module.exports = async function handler(req, res) {
       items.push({ pack: i + 1, sticks: lines, stick_count: count, total_da: packTotal });
     }
 
+    /* Livraison relue dans la table, jamais prise du navigateur — même
+       raison que pour les prix. Une wilaya hors grille vaut 0 : le tarif
+       se confirme au téléphone. */
+    const delivery = WILAYAS.livraison(wilaya);
+    const grand = total + delivery;
+
     /* Une référence peut entrer en collision : on retente une fois. */
     let row;
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -128,7 +136,8 @@ module.exports = async function handler(req, res) {
           method: 'POST',
           body: [{
             ref: ref(), first_name: first, last_name: last, phone,
-            wilaya, address, items, total_da: total, status: 'new'
+            wilaya, address, items,
+            delivery_da: delivery, total_da: grand, status: 'new'
           }]
         });
         row = rows[0];
@@ -138,7 +147,9 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    return send(res, 201, { ref: row.ref, total_da: row.total_da, id: row.id });
+    return send(res, 201, {
+      ref: row.ref, total_da: row.total_da, delivery_da: row.delivery_da, id: row.id
+    });
   } catch (err) {
     return fail(res, err);
   }

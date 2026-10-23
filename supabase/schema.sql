@@ -47,7 +47,8 @@ create table if not exists public.orders (
   wilaya      text not null,
   address     text not null check (length(trim(address)) >= 6),
   items       jsonb not null,
-  total_da    integer not null check (total_da >= 0),
+  delivery_da integer not null default 0 check (delivery_da >= 0),
+  total_da    integer not null check (total_da >= 0),   -- bâtons + livraison
   status      text not null default 'new'
               check (status in ('new', 'confirmed', 'shipped', 'cancelled')),
   note        text,
@@ -167,3 +168,12 @@ on conflict (id) do update
   set public = true,
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
+
+
+-- ---------------------------------------------------------------
+-- Si la table orders existe déjà, c'est cette ligne qu'il faut jouer
+-- plutôt que tout le fichier :
+--
+--   alter table public.orders
+--     add column if not exists delivery_da integer not null default 0;
+-- ---------------------------------------------------------------
